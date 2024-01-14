@@ -19,8 +19,7 @@ show:             ## Show the current environment.
 init:             ## Initialize the project.
 	@virtualenv -p python3 .venv
 	@poetry install
-	@pipenv install --dev
-	@pipenv run pre-commit install
+
 
 .PHONY: run
 run:              ## Run the project.	
