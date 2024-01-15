@@ -22,3 +22,12 @@ make install
 source ./activate
 ```
 > This also exports all variables in the .env file to the environment.
+
+### 5. Run The Project
+```bash
+# Run the development server
+make dev
+
+# Run the production server
+make run
+```
