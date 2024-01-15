@@ -9,6 +9,22 @@ readme = "README.md"
 python = "^3.10"
 django = "^5.0.1"
 clarifai-grpc = "^10.0.2"
+django-channels = "^0.7.0"
+django-restframework = "^0.0.1"
+gevent = "^23.9.1"
+python-socketio = "^5.11.0"
+channels-redis = "^4.2.0"
+python-engineio = "^4.8.2"
+simple-websocket = "^1.0.0"
+gevent-websocket = "^0.10.1"
+pillow = "^10.2.0"
+imageio = "^2.33.1"
+djangorestframework-simplejwt = "^5.3.1"
+drf-yasg = "^1.21.7"
+daphne = {extras = ["http2"], version = "^4.0.0"}
+djangorestframework = "^3.14.0"
+opencv-python-headless = "^4.9.0.80"
+twisted = {extras = ["http2", "tls"], version = "^23.10.0"}
 
 
 [tool.poetry.group.dev.dependencies]
