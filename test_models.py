@@ -4,7 +4,7 @@ from ilens.clarifai import (
     Text,
     Audio,
     ClarifaiGPT4,
-    ClarifaiSpeechRecognition,
+    ClarifaiTranscription,
 )
 import logging
 
@@ -21,7 +21,7 @@ PROMPT = (
 logging.info("Loading models...")
 llm = ClarifaiGPT4(max_tokens=MAX_TOKENS)
 tts = ClarifaiTextToSpeech(voice=VOICE)
-stt = ClarifaiSpeechRecognition()
+stt = ClarifaiTranscription()
 logging.info("Models loaded.")
 logging.info("Generating story...")
 story = llm.run({"text": Text(raw=PROMPT)})[0]["text"]
