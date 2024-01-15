@@ -19,11 +19,19 @@ show:             ## Show the current environment.
 init:             ## Initialize the project.
 	@virtualenv -p python3 .venv
 	@poetry install
+	@npm install -g nodemon
+	@sudo add-apt-repository ppa:mc3man/trusty-media
+	@sudo apt-get update
+	@sudo apt-get install ffmpeg
 
 
 .PHONY: run
-run:              ## Run the project.	
-	$(ENV_PREFIX)/gunicorn -c gunicorn.conf.py
+run:              ## Run the production server.
+	python3 start.py $$ASGI_APPLICATION
+
+.PHONY: dev
+dev:              ## Run the development server.
+	nodemon -x 'python3 start.py $$ASGI_APPLICATION' -e py
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
