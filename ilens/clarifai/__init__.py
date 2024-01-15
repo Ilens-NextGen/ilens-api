@@ -5,8 +5,11 @@ from ilens.clarifai.base import (
     media_from_text,  # noqa: F401
 )
 from ilens.clarifai.base import Audio, Video, Image, Text, Concept  # noqa: F401
-from ilens.clarifai.gpt4 import ClarifaiGPT4  # noqa: F401
+from ilens.clarifai.text_generation import (
+    ClarifaiGPT4,  # noqa: F401
+    ClarifaiGPT4V,  # noqa: F401
+    ClarifaiGPT4VAlternative,  # noqa: F401
+)
 from ilens.clarifai.text_to_speech import ClarifaiTextToSpeech  # noqa: F401
-from ilens.clarifai.gpt4v import ClarifaiGPT4V  # noqa: F401
 from ilens.clarifai.image_recognition import ClarifaiImageRecognition  # noqa: F401
-from ilens.clarifai.speech_recognition import ClarifaiSpeechRecognition  # noqa: F401
+from ilens.clarifai.transcription import ClarifaiTranscription  # noqa: F401

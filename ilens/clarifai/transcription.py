@@ -11,20 +11,24 @@ class TextResponse(TypedDict):
 
 
 @dataclass
-class ClarifaiSpeechRecognition(BaseModel[Audio, TextResponse]):
+class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
     """Clarifai Speech Recognition Model"""
 
     model_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_ASSEMBLY_MODEL_ID", "whisper")
+        default_factory=lambda: getenv(
+            "CLARIFAI_TRANSCRIPTION_MODEL_ID", "audio-transcription"
+        )
     )
     model_version_id: Optional[str] = field(
-        default_factory=lambda: getenv("CLARIFAI_STT_MODEL_VERSION_ID", None)
+        default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_STT_APP_ID", "transcription")
+        default_factory=lambda: getenv(
+            "CLARIFAI_TRANSCRIPTION_APP_ID", "speech-recognition"
+        )
     )
     user_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_STT_USER_ID", "openai")
+        default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_USER_ID", "assemblyai")
     )
 
     def parse_output(self, output: Any) -> TextResponse:
