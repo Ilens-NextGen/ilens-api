@@ -1,5 +1,5 @@
 from socketio.async_server import AsyncServer  # type: ignore[import]
-from socketio import ASGIApp  # type: ignore[import]
+from socketio import ASGIApp
 from django.conf import settings
 
 server = AsyncServer(

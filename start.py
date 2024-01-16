@@ -29,7 +29,7 @@ class CommandLineInterface(daphne.cli.CommandLineInterface):
             type=int,
             dest="websocket_timeout",
             help="Maximum time to allow a websocket to be connected. -1 for infinite.",
-            default=getintenv("WEBSOCKET_TIMEOUT", 5),
+            default=getintenv("WEBSOCKET_TIMEOUT", -1),
         )
         self.parser.add_argument(
             "--websocket-connect-timeout",

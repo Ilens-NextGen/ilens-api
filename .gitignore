@@ -6,3 +6,6 @@ node_modules
 *.js
 package-lock.json
 package.json
+dist/
+.parcel-cache/
+db.sqlite3

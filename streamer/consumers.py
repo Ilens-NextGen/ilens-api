@@ -1,5 +1,4 @@
 import socketio  # type: ignore[import]
-import asyncio
 from random import choice
 from django.dispatch import receiver
 from ilens.clarifai import ClarifaiTranscription, Audio
@@ -112,11 +111,11 @@ class ChatNamespace(socketio.AsyncNamespace):
         image_byte = self.video_processor.convert_result_image_to_bytes(image)
         finished_frame.send(instance=self, sender=self, image_byte=image_byte)
         print("clip ", timestamp)
-        await asyncio.sleep(2)  # to stimulate running the image handling
         # await asyncio.to_thread(self.find_obstacles.find_all_objects, image_byte)
         await sio.emit(
             "result", "There's a car in front of you. Watch out", room=self.room_id
         )
+        print("Result sent")
 
     async def on_question(self, sid, question):
         print(question)
