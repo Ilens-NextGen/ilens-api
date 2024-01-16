@@ -30,14 +30,13 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "laughing-computing-machine-gj696v7xvxw2wpw6-8000.app.github.dev",
-    "8000-ilensnextgen-components-ay4frb3hdwy.ws-eu107.gitpod.io",
+    "8000-ilensnextgen-ilensapi-miwg4r44eqe.ws-eu107.gitpod.io",
 ]
 CORS_ALLOWED_ORIGINS = [
-    "laughing-computing-machine-gj696v7xvxw2wpw6-1234.app.github.dev",
     "localhost",
     "127.0.0.1",
-    "https://1234-ilensnextgen-components-ay4frb3hdwy.ws-eu107.gitpod.io",
+    "8000-ilensnextgen-ilensapi-miwg4r44eqe.ws-eu107.gitpod.io",
+    'https://1234-ilensnextgen-ilensapi-miwg4r44eqe.ws-eu107.gitpod.io',
 ]
 
 # Application definition

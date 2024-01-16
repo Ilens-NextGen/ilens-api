@@ -19,7 +19,7 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    # url='https://laughing-computing-machine-gj696v7xvxw2wpw6-8000.app.github.dev' # comment this line. It's for my codespace
+    url='https://8000-ilensnextgen-ilensapi-miwg4r44eqe.ws-eu107.gitpod.io' # comment this line. It's for my codespace
 )
 
 urlpatterns = [

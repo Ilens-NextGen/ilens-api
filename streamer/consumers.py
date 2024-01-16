@@ -1,11 +1,10 @@
 import socketio  # type: ignore[import]
-import asyncio
 from random import choice
 from django.dispatch import receiver  # type: ignore[import]
 from streamer.signals import finished_frame
 from image_processor.clarifai_processor import AsyncVideoProcessor
 from ilens.clarifai import ClarifaiImageRecognition
-from ilens.socket import server as sio
+from ilens.socket import sio
 
 MOCK_AI_RESPONSES = [
     "Hello! How can I assist you today?",
@@ -52,11 +51,11 @@ class ChatNamespace(socketio.AsyncNamespace):
         image_byte = self.video_processor.convert_result_image_to_bytes(image)
         finished_frame.send(instance=self, sender=self, image_byte=image_byte)
         print("clip ", timestamp)
-        await asyncio.sleep(2)  # to stimulate running the image handling
         # await asyncio.to_thread(self.find_obstacles.find_all_objects, image_byte)
         await sio.emit(
             "result", "There's a car in front of you. Watch out", room=self.room_id
         )
+        print("Result sent")
 
     async def on_question(self, sid, question):
         print(question)

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Document</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="container text-center">
+            <h1>Webcam</h1>
+            <div class="container mb-2">
+                <div class="form-floating">
+                    <select class="form-select" id="cam-list">
+                    </select>
+                    <label for="cam-list">Select Camera</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body" id="card-body">
+                            <video id="video" autoplay></video>
+                            <button id="start" type="button" class="btn btn-primary">Start Stream</button>
+                            <button id="stop" type="button" class="btn btn-danger">Stop Stream</button>
+                            <canvas id="canvas" width="640" height="480"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card" id="card">
+                        <div class="card-body">
+                            <img alt="The webcam snapshot will appear in this box." id="photo">
+                            <button id="snap" type="button" class="btn btn-success mt-2">Snap Photo</button>
+                            <button id="clear" type="button" class="btn btn-danger mt-2">Clear Photo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card" id="card">
+                        <div class="card-body">
+                            <video id="webcam-recording" autoplay playsinline></video>
+                            <button id="start-recording" type="button" class="btn btn-success mt-2">
+                                Record Webcam (1 sec)
+                            </button>
+                        </div>
+                    </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Testing chatting. This is just the websocket</h4>
+                        <ul id="chat-log"></ul>
+                        <input id="chat-message-input" type="text" size="100"><br>
+                        <button id="chat-message-submit" class="btn btn-success mt-2">Send</button>
+                    </div>
+                </div>
+            </div>
+            <!-- error logs -->
+            <div class="container mt-2">
+                <div class="alert alert-danger" role="alert" id="error-message">
+                </div>
+            </div>
+        </div>
+        <div class="container text-center">
+            <h1>Microphone</h1>
+            <div class="container mb-2">
+                <div class="form-floating">
+                    <select class="form-select" id="mic-list">
+                    </select>
+                    <label for="mic-list">Select Microphone</label>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="app.js"></script>
+    </body>
+</html>
