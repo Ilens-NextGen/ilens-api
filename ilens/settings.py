@@ -14,6 +14,8 @@ from datetime import timedelta
 from pathlib import Path
 import os
 
+from ilens.core.utils import getboolenv, getintenv, getlistenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,12 +34,6 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "laughing-computing-machine-gj696v7xvxw2wpw6-8000.app.github.dev",
     "8000-ilensnextgen-components-ay4frb3hdwy.ws-eu107.gitpod.io",
-]
-CORS_ALLOWED_ORIGINS = [
-    "laughing-computing-machine-gj696v7xvxw2wpw6-1234.app.github.dev",
-    "localhost",
-    "127.0.0.1",
-    "https://1234-ilensnextgen-components-ay4frb3hdwy.ws-eu107.gitpod.io",
 ]
 
 # Application definition
@@ -203,3 +199,40 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email config
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+# SOCKET_IO
+SOCKET_MONITORING = getboolenv("SOCKET_MONITORING", False)
+SOCKET_LOGGER = getboolenv("SOCKET_LOGGER", DEBUG)
+CORS_ALLOWED_ORIGINS = getlistenv("CORS_ALLOWED_ORIGINS", [])
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.extend(
+        ["localhost", "127.0.0.1"],
+    )
+if SOCKET_MONITORING:
+    CORS_ALLOWED_ORIGINS.append("https://admin.socket.io")
+
+# if set to True, event handlers will be run in separate threads
+SOCKET_ASYNC_HANDLERS = getboolenv("SOCKET_ASYNC_HANDLERS", True)
+
+# when set to False, new connections are accepted when the connect
+# handler returns something other than False
+SOCKET_ALWAYS_CONNECT = getboolenv("SOCKET_ALWAYS_CONNECT", False)
+
+# the interval in seconds at which the server pings the client
+SOCKET_PING_INTERVAL = getintenv("SOCKET_PING_INTERVAL", 25)
+
+# the time in seconds that the client waits for the server to respond
+# before disconnecting
+SOCKET_PING_TIMEOUT = getintenv("SOCKET_PING_TIMEOUT", 20)
+
+# the maximum allowed packet size in bytes
+_20MB = 20 * 1024 * 1024
+SOCKET_MAX_HTTP_BUFFER_SIZE = getintenv("SOCKET_BUFFER_SIZE", _20MB)
+
+# whether to compress packets when using the polling transport
+SOCKET_HTTP_COMPRESS = getboolenv("SOCKET_HTTP_COMPRESS", True)
+
+# the HTTP compression threshold in bytes. Below this value, packets will
+# not be compressed
+SOCKET_COMPRESSION_THRESHOLD = getintenv("SOCKET_COMPRESSION_THRESHOLD", 1024)

@@ -222,7 +222,6 @@ class BaseModel(Generic[MediaType, ResponseType]):
         request = self._create_request(inputs)
         response = self._execute_request(request)
         if response.status.code != status_code_pb2.SUCCESS:
-            print(response)
             self.handle_error(response.status)
             return []
         else:

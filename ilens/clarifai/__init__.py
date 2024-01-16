@@ -11,5 +11,8 @@ from ilens.clarifai.text_generation import (
     ClarifaiGPT4VAlternative,  # noqa: F401
 )
 from ilens.clarifai.text_to_speech import ClarifaiTextToSpeech  # noqa: F401
-from ilens.clarifai.image_recognition import ClarifaiImageRecognition  # noqa: F401
+from ilens.clarifai.image_processing import (
+    ClarifaiImageDetection,  # noqa: F401
+    ClarifaiImageRecognition,  # noqa: F401
+)
 from ilens.clarifai.transcription import ClarifaiTranscription  # noqa: F401

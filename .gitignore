@@ -2,3 +2,7 @@ __pycache__
 .env
 *.wav
 test_*.py
+node_modules
+*.js
+package-lock.json
+package.json

@@ -12,7 +12,7 @@ class TextResponse(TypedDict):
 
 @dataclass
 class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
-    """Clarifai Speech Recognition Model"""
+    """Clarifai Speech Transcription Model"""
 
     model_id: str = field(
         default_factory=lambda: getenv(
@@ -32,5 +32,4 @@ class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
     )
 
     def parse_output(self, output: Any) -> TextResponse:
-        print(output)
         return {"text": output.data.text.raw}
