@@ -56,27 +56,94 @@ async def clip(sid, blob: bytes, duration: float):
 
 @sio.event
 async def query(sid, audio: bytes, clip: bytes):
-    print("Question received")
-    asyncio.create_task(sio.send("Question received!"))
-    transcript = (
-        await asyncio.to_thread(transcriber.run, {"audio": Audio(base64=audio)})
-    )[0]["text"]
-    print("Question transcript: ", transcript)
-    best_frame = await image_processor.process_video(clip)
-    image_bytes = await asyncio.to_thread(
-        image_processor.convert_result_image_to_bytes, best_frame
+    timer = Timer(
+        "Query",
+        logger=write,
     )
-    answer = (
-        await asyncio.to_thread(
-            llm.run,
-            {
-                "text": Text(raw=transcript),
-                "image": Image(base64=image_bytes),
-            },
-        )
-    )[0]["text"]
-    print("Answer: ", answer)
-    await sio.emit("response", answer, to=sid)
+    timer.start()
+    # TRANSCRIPT_URL = "http://100.26.250.23/transcript.txt"
+    # IMAGE_URL = "http://100.26.250.23/test.png"
+    # AUDIO_URL = "http://100.26.250.23/query.wav"
+    # ANSWER_URL = "http://100.26.250.23/answer.txt"
+
+    print(
+        f"Got a query sent as audio of {len(audio)} bytes and clip of {len(clip)} bytes"
+    )
+
+    # @profile  # noqa: F821 # type: ignore
+    async def get_image():
+        with Timer("Image Selection", logger=write):
+            best_frame = await image_processor.process_video(clip)
+            image_bytes = await asyncio.to_thread(
+                image_processor.convert_result_image_to_bytes, best_frame
+            )
+        return image_bytes
+
+    # @profile  # noqa: F821 # type: ignore
+    async def get_transcript():
+        with Timer("Transcription", logger=write):
+            transcript = (
+                await asyncio.to_thread(
+                    transcriber.run,
+                    {
+                        # "audio": Audio(url=AUDIO_URL),
+                        "audio": Audio(base64=audio),
+                    },
+                )
+            )[0]["text"]
+            print("Question transcript: ", transcript)
+        return transcript
+
+    # asyncio.create_task(sio.send("Question received!"))
+    image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
+    # with Timer("LLM Query", logger=write):
+    #     answer = (
+    #         await asyncio.to_thread(
+    #             llm.run,
+    #             {
+    #                 # "text": Text(url=TRANSCRIPT_URL),
+    #                 "text": Text(raw=transcript),
+    #                 # "image": Image(url=IMAGE_URL),
+    #                 "image": Image(base64=image_bytes),
+    #             },
+    #         )
+    #     )[0]["text"]
+    #     print("Answer: ", answer)
+    # with Timer("TextToSpeech", logger=write):
+    #     audio_stream = (
+    #         await asyncio.to_thread(
+    #             tts.run,
+    #             {
+    #                 # "text": Text(url=ANSWER_URL),
+    #                 "text": Text(raw=answer),
+    #             },
+    #         )
+    #     )[0]["audio"]
+    #     audio_bytes = audio_stream.getvalue()
+    #     n_bytes = len(audio_bytes)
+    #     print(f"Got a {n_bytes} bytes audio")
+    with Timer("GPT Workflow", logger=write):
+        audio_stream = (
+            await asyncio.to_thread(
+                gpt_workflow.run,
+                {
+                    "text": Text(raw=transcript),
+                    # "text": Text(url=TRANSCRIPT_URL),
+                    "image": Image(base64=image_bytes),
+                    # "image": Image(url=IMAGE_URL),
+                },
+            )
+        )[0]["audio"]
+        audio_bytes = audio_stream.getvalue()
+        n_bytes = len(audio_bytes)
+        print(f"Got a {n_bytes} bytes audio")
+    with Timer("Audio emit", logger=write):
+        await sio.emit("audio", audio_bytes, to=sid)
+    timer.stop()
+    with open("timed.txt", "a") as f:
+        f.write(stream.getvalue())
+        f.write(f"{'-'*20}\n")
+        clear()
 
 
 # @sio.eve
