@@ -1,6 +1,18 @@
 from dataclasses import dataclass, field
+from functools import wraps
+from logging import getLogger
 import time
-from typing import Any, Callable, Generic, Optional, ParamSpec, TypeVar, overload, Union
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Generic,
+    Optional,
+    ParamSpec,
+    TypeVar,
+    overload,
+    Union,
+)
 import os
 
 T = TypeVar("T", bound=Any)
@@ -177,48 +189,60 @@ def env_descriptor(
     return descriptor  # type: ignore[return-value]
 
 
+@dataclass
 class timed:
     """
     Time operations. can be used as a decorator or context manager.
+    Also supports async operations.
     """
 
-    debug = env_descriptor("DEBUG", False, getboolenv)
-
-    def __init__(
-        self, op_name: Optional[str] = None, writer: Callable[[str], Any] = print
-    ):
-        """Initialize the timed object.
-
-        Args:
-            op_name (Optional[str], optional): Name of the operation. Defaults to None.
-            writer (Callable[[str], Any], optional): Writer function. Defaults to print.
-        """
-        self.op_name = op_name
-        self.writer = writer
+    name: Optional[str] = None
+    output: Union[str, Callable[[float], str]] = "{name} took: {seconds:0.4f} seconds"
+    initial_text: Union[bool, str] = False
+    interrupt_output: Union[
+        str, Callable[[float], str]
+    ] = "{name} interrupted after {:0.4f} seconds"
+    logger: Optional[Callable[[str], Any]] = field(
+        default_factory=lambda: getLogger("timer").info
+    )
 
     def start(self):
         """Start the timer."""
         self._start = time.perf_counter()
-        self.debug and self.writer(f"`{self.op_name or 'Operation'}` started")
+        if self.logger and self.initial_text:
+            if isinstance(self.initial_text, str):
+                initial_text = self.initial_text.format(name=self.name)
+            elif self.name:
+                initial_text = f"{self.name} started"
+            else:
+                initial_text = "Operation started"
+            self.logger(initial_text)
 
     def interrupt(self):
         """Interrupt the timer."""
         self._end = time.perf_counter()
         self._interval = self._end - self._start
-        self.debug and self.writer(
-            f"`{self.op_name or 'Operation'}` interrupted after {self._interval:.3f} seconds"
-        )
+        if self.logger:
+            if callable(self.interrupt_output):
+                self.logger(self.interrupt_output(self._interval))
+            else:
+                self.logger(
+                    self.interrupt_output.format(name=self.name, seconds=self._interval)
+                )
 
     def stop(self):
         """Stop the timer."""
         self._end = time.perf_counter()
         self._interval = self._end - self._start
-        self.debug and self.writer(
-            f"`{self.op_name or 'Operation'}` took {self._interval:.3f} seconds"
-        )
+        if self.logger:
+            if callable(self.output):
+                self.logger(self.output(self._interval))
+            else:
+                self.logger(self.output.format(name=self.name, seconds=self._interval))
 
     def __enter__(self):
         self.start()
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type:
@@ -227,14 +251,45 @@ class timed:
             self.stop()
         return False
 
-    def __call__(self, func: Callable[P, R]) -> Callable[P, R]:
-        if not self.op_name:
-            self.op_name = func.__qualname__
+    async def __aenter__(self):
+        return self.__enter__()
 
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        return self.__exit__(exc_type, exc_value, traceback)
+
+    def __call__(self, func: Callable[P, R]) -> Callable[P, R]:
+        if not self.name:
+            self.name = func.__qualname__
+
+        @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs):
             self.start()
             try:
                 result = func(*args, **kwargs)
+                self.stop()
+                return result
+            except Exception as e:
+                self.interrupt()
+                raise e
+
+        return wrapper
+
+    @classmethod
+    def async_(cls, *args, **kwargs):
+        timer = cls(*args, **kwargs)
+        return timer.async_decorator
+
+    def async_decorator(
+        self, func: Callable[P, Awaitable[R]]
+    ) -> Callable[P, Awaitable[R]]:
+        if not self.name:
+            self.name = func.__qualname__
+
+        @wraps(func)
+        async def wrapper(*args: P.args, **kwargs: P.kwargs):
+            self.start()
+            try:
+                result = await func(*args, **kwargs)
                 self.stop()
                 return result
             except Exception as e:
