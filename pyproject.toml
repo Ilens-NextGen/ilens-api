@@ -25,6 +25,7 @@ daphne = {extras = ["http2"], version = "^4.0.0"}
 djangorestframework = "^3.14.0"
 opencv-python-headless = "^4.9.0.80"
 twisted = {extras = ["http2", "tls"], version = "^23.10.0"}
+redis = {extras = ["hiredis"], version = "^5.0.1"}
 
 
 [tool.poetry.group.dev.dependencies]

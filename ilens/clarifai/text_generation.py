@@ -62,7 +62,7 @@ class ClarifaiGPT4V(BaseModel[Union[Image, Text], TextResponse]):
     # MODEL PARAMS
 
     model_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_GPT4V_MODEL_ID", "openai-gpt-4-vision")
+        default_factory=lambda: getenv("CLARIFAI_GPT4V_MODEL_ID", "gpt-4-vision")
     )
     model_version_id: Optional[str] = field(
         default_factory=lambda: getenv("CLARIFAI_GPT4V_MODEL_VERSION_ID", None)
@@ -115,6 +115,7 @@ class ClarifaiGPT4VAlternative(ClarifaiGPT4V):
             return None
         return params
 
+    # @profile  # noqa: F821 # type: ignore
     def run(self, *data: dict[str, Image | Text]) -> list[TextResponse]:
         """Run the model on the given data."""
         images: list[Image] = []

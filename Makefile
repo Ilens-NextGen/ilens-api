@@ -25,6 +25,12 @@ init:             ## Initialize the project.
 	@sudo apt-get install ffmpeg
 
 
+.PHONY: redis-setup
+redis-setup:      ## Setup redis.
+	@sudo apt-get install redis-server
+	@sudo service redis-server start
+
+
 .PHONY: run
 run:              ## Run the production server.
 	python3 start.py $$ASGI_APPLICATION

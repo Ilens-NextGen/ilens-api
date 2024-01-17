@@ -16,3 +16,4 @@ from ilens.clarifai.image_processing import (
     ClarifaiImageRecognition,  # noqa: F401
 )
 from ilens.clarifai.transcription import ClarifaiTranscription  # noqa: F401
+from ilens.clarifai.workflows import ClarifaiMultimodalToSpeechWF  # noqa: F401

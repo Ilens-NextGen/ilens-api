@@ -25,16 +25,12 @@ class ClarifaiTextToSpeech(BaseModel[Text, AudioResponse]):
 
     # MODEL PARAMS
 
-    model_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_TTS_MODEL_ID", "openai-tts-1")
-    )
+    model_id: str = field(default_factory=lambda: getenv("CLARIFAI_TTS_MODEL_ID"))
     model_version_id: Optional[str] = field(
         default_factory=lambda: getenv("CLARIFAI_TTS_MODEL_VERSION_ID", None)
     )
-    app_id: str = field(default_factory=lambda: getenv("CLARIFAI_TTS_APP_ID", "tts"))
-    user_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_TTS_USER_ID", "openai")
-    )
+    app_id: str = field(default_factory=lambda: getenv("CLARIFAI_TTS_APP_ID"))
+    user_id: str = field(default_factory=lambda: getenv("CLARIFAI_TTS_USER_ID"))
 
     def _get_inference_params(self) -> dict[str, Any] | None:
         """Returns the model's inference params."""

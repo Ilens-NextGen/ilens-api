@@ -14,7 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 import os
 
-from ilens.core.utils import getboolenv, getintenv, getlistenv
+from ilens.core.utils import getboolenv, getenv, getintenv, getlistenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-5#=4(z6zrr1b+s$e!@q$6)34qwm^&cn_t5wh$0ugi09re^6@#-"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = getboolenv("DEBUG", False)
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -40,7 +40,6 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     "daphne",  # Comment if you want to run wsgi
     "channels",  # Comment if you want to run wsgi
-    "image_processor",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -210,6 +209,9 @@ if DEBUG:
     )
 if SOCKET_MONITORING:
     CORS_ALLOWED_ORIGINS.append("https://admin.socket.io")
+
+# the async model to use.
+SOCKET_ASYNC_MODE = getenv("ASYNC_MODE", "asgi")
 
 # if set to True, event handlers will be run in separate threads
 SOCKET_ASYNC_HANDLERS = getboolenv("SOCKET_ASYNC_HANDLERS", True)

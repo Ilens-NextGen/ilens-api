@@ -1,4 +1,5 @@
 import asyncio
+from math import floor
 import cv2
 import numpy as np
 from PIL import Image
@@ -10,6 +11,7 @@ from io import BytesIO
 class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
+    # @profile  # noqa: F821 # type: ignore
     async def process_video(self, video_bytes: bytes) -> np.ndarray:
         try:
             frames = await asyncio.to_thread(self._bytes_to_frames, video_bytes)
@@ -18,7 +20,8 @@ class AsyncVideoProcessor:
                 self._get_sharpest_frame, gray_frames
             )
             best_frame = frames[best_frame_index]
-            return cv2.resize(best_frame, (0, 0), fx=0.95, fy=0.95)
+            # return cv2.resize(best_frame, (0, 0), fx=0.95, fy=0.95)
+            return best_frame
         except Exception as e:
             print(f"Error processing video: {e}")
             raise e
@@ -37,8 +40,20 @@ class AsyncVideoProcessor:
         # print(sharpest_frame_index)
         return sharpest_frame_index
 
+    # @profile  # noqa: F821 # type: ignore
     def convert_result_image_to_bytes(self, image: np.ndarray) -> bytes:
-        image_pil = Image.fromarray(image)
-        with BytesIO() as buffer:
-            image_pil.save(buffer, format="PNG")
-            return buffer.getvalue()
+        image_pil: Image.Image = Image.fromarray(image)
+        # initial_size = len(image_pil.tobytes()) / 1024
+        x, y = image_pil.size
+        if image_pil.width > image_pil.height:
+            x2, y2 = floor(x - 50), floor(y - 20)
+        else:
+            x2, y2 = floor(x - 20), floor(y - 50)
+        image_pil.resize((x2, y2), Image.LANCZOS)
+        buffer = BytesIO()
+        image_pil.save(buffer, format="PNG", optimize=True, quality=75)
+        image_bytes = buffer.getvalue()
+        # Path("image.png").write_bytes(image_bytes)
+        # final_size = len(image_bytes) / 1024
+        # print(f"Image size reduced from {initial_size}KB to {final_size}KB")
+        return image_bytes

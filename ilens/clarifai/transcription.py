@@ -15,20 +15,18 @@ class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
     """Clarifai Speech Transcription Model"""
 
     model_id: str = field(
-        default_factory=lambda: getenv(
-            "CLARIFAI_TRANSCRIPTION_MODEL_ID", "audio-transcription"
-        )
+        default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_MODEL_ID")
     )
     model_version_id: Optional[str] = field(
         default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
         default_factory=lambda: getenv(
-            "CLARIFAI_TRANSCRIPTION_APP_ID", "speech-recognition"
+            "CLARIFAI_TRANSCRIPTION_APP_ID",
         )
     )
     user_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_USER_ID", "assemblyai")
+        default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_USER_ID")
     )
 
     def parse_output(self, output: Any) -> TextResponse:

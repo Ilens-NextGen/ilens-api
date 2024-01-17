@@ -185,6 +185,7 @@ class BaseModel(Generic[MediaType, ResponseType]):
         metadata = tuple(self._get_metadata().items())
         return stub, metadata
 
+    # @profile  # noqa: F821 # type: ignore
     def _create_request(self, inputs: list[resources_pb2.Input]):
         return service_pb2.PostModelOutputsRequest(
             user_app_id=self._get_user_app_id(),
@@ -199,6 +200,7 @@ class BaseModel(Generic[MediaType, ResponseType]):
             data=data,
         )
 
+    # @profile  # noqa: F821 # type: ignore
     def _execute_request(
         self, request: service_pb2.PostModelOutputsRequest
     ) -> service_pb2.MultiOutputResponse:
@@ -216,6 +218,7 @@ class BaseModel(Generic[MediaType, ResponseType]):
     def handle_error(self, error: Status) -> None:
         raise Exception(f"{error.description}")
 
+    # @profile  # noqa: F821 # type: ignore
     def run(self, *data: dict[str, MediaType]) -> list[ResponseType]:
         """Runs the model on the data."""
         inputs = [self._create_input(d) for d in data]
@@ -226,3 +229,83 @@ class BaseModel(Generic[MediaType, ResponseType]):
             return []
         else:
             return self.parse_outputs(response.outputs)
+
+
+@dataclass
+class BaseWorkflow(Generic[MediaType, ResponseType]):
+    """A clarifai workflow."""
+
+    user_id: str
+    """The user id."""
+    app_id: str
+    """The app id."""
+    workflow_id: str
+    """The workflow id."""
+    pat: str = field(default_factory=lambda: getenv("CLARIFAI_PAT"))
+
+    # @profile  # noqa: F821 # type: ignore
+    def _create_channel(
+        self,
+    ) -> tuple[service_pb2_grpc.V2Stub, tuple[tuple[str, str], ...]]:
+        """Creates the channel and returns the stub and metadata."""
+        channel: Channel = ClarifaiChannel.get_grpc_channel()
+        stub = service_pb2_grpc.V2Stub(channel)
+        metadata = tuple(self._get_metadata().items())
+        return stub, metadata
+
+    def _get_metadata(self):
+        """Returns the metadata for the request."""
+        return {"authorization": f"Key {self.pat}"}
+
+    def _get_user_app_id(self) -> resources_pb2.UserAppIDSet:
+        """Returns the user app id."""
+        return resources_pb2.UserAppIDSet(
+            user_id=self.user_id,
+            app_id=self.app_id,
+        )
+
+    def _create_input(self, data: dict[str, MediaType]) -> resources_pb2.Input:
+        return resources_pb2.Input(
+            data=data,
+        )
+
+    # @profile  # noqa: F821 # type: ignore
+    def _create_workflow_request(
+        self, inputs: list[resources_pb2.Input]
+    ) -> service_pb2.PostWorkflowResultsRequest:
+        return service_pb2.PostWorkflowResultsRequest(
+            user_app_id=self._get_user_app_id(),
+            workflow_id=self.workflow_id,
+            inputs=inputs,
+        )
+
+    # @profile  # noqa: F821 # type: ignore
+    def _execute_request(
+        self, request: service_pb2.PostWorkflowResultsRequest
+    ) -> service_pb2.MultiOutputResponse:
+        stub, metadata = self._create_channel()
+        return stub.PostWorkflowResults(request, metadata=metadata)
+
+    def parse_output(self, output: Any) -> ResponseType:
+        return output
+
+    def parse_outputs(
+        self, outputs: RepeatedCompositeFieldContainer
+    ) -> list[ResponseType]:
+        return [self.parse_output(output) for output in outputs]
+
+    def handle_error(self, error: Status) -> None:
+        raise Exception(f"{error.description}")
+
+    # @profile  # noqa: F821 # type: ignore
+    def run(self, *data: dict[str, MediaType]) -> list[ResponseType]:
+        """Runs the workflow on the data."""
+        inputs = [self._create_input(d) for d in data]
+        request = self._create_workflow_request(inputs)
+        response = self._execute_request(request)
+        if response.status.code != status_code_pb2.SUCCESS:
+            print(response)
+            self.handle_error(response.status)
+            return []
+        else:
+            return self.parse_outputs(response.results)

@@ -9,3 +9,7 @@ package.json
 dist/
 .parcel-cache/
 db.sqlite3
+timed.txt
+*.mp4
+socky
+*.png

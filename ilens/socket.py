@@ -1,9 +1,9 @@
 from socketio.async_server import AsyncServer  # type: ignore[import]
-from socketio import ASGIApp
+from socketio import ASGIApp  # type: ignore[import]
 from django.conf import settings
 
 server = AsyncServer(
-    async_mode="asgi",
+    async_mode=settings.SOCKET_ASYNC_MODE,
     cors_allowed_origins=settings.CORS_ALLOWED_ORIGINS,
     logger=settings.SOCKET_LOGGER,
     engineio_logger=settings.SOCKET_LOGGER,
@@ -17,6 +17,4 @@ server = AsyncServer(
 )
 # server.instrument(auth={"username": "admin", "password": "admin"})
 socketio_app = ASGIApp(server)
-
-
 from streamer import consumers  # noqa: E402, F401

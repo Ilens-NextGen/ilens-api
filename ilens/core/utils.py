@@ -1,8 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Any, Callable, Generic, TypeVar, overload, Union
+import time
+from typing import Any, Callable, Generic, Optional, ParamSpec, TypeVar, overload, Union
 import os
 
 T = TypeVar("T", bound=Any)
+P = ParamSpec("P")
+R = TypeVar("R")
 MISSING = object()
 
 
@@ -172,3 +175,70 @@ def env_descriptor(
     descriptor = EnvDescriptor(name, default)
     descriptor.getter = getter
     return descriptor  # type: ignore[return-value]
+
+
+class timed:
+    """
+    Time operations. can be used as a decorator or context manager.
+    """
+
+    debug = env_descriptor("DEBUG", False, getboolenv)
+
+    def __init__(
+        self, op_name: Optional[str] = None, writer: Callable[[str], Any] = print
+    ):
+        """Initialize the timed object.
+
+        Args:
+            op_name (Optional[str], optional): Name of the operation. Defaults to None.
+            writer (Callable[[str], Any], optional): Writer function. Defaults to print.
+        """
+        self.op_name = op_name
+        self.writer = writer
+
+    def start(self):
+        """Start the timer."""
+        self._start = time.perf_counter()
+        self.debug and self.writer(f"`{self.op_name or 'Operation'}` started")
+
+    def interrupt(self):
+        """Interrupt the timer."""
+        self._end = time.perf_counter()
+        self._interval = self._end - self._start
+        self.debug and self.writer(
+            f"`{self.op_name or 'Operation'}` interrupted after {self._interval:.3f} seconds"
+        )
+
+    def stop(self):
+        """Stop the timer."""
+        self._end = time.perf_counter()
+        self._interval = self._end - self._start
+        self.debug and self.writer(
+            f"`{self.op_name or 'Operation'}` took {self._interval:.3f} seconds"
+        )
+
+    def __enter__(self):
+        self.start()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            self.interrupt()
+        else:
+            self.stop()
+        return False
+
+    def __call__(self, func: Callable[P, R]) -> Callable[P, R]:
+        if not self.op_name:
+            self.op_name = func.__qualname__
+
+        def wrapper(*args: P.args, **kwargs: P.kwargs):
+            self.start()
+            try:
+                result = func(*args, **kwargs)
+                self.stop()
+                return result
+            except Exception as e:
+                self.interrupt()
+                raise e
+
+        return wrapper
