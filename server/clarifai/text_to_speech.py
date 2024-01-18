@@ -22,6 +22,7 @@ class ClarifaiTextToSpeech(BaseModel[Text, AudioResponse]):
     speed: Optional[float] = field(
         default_factory=lambda: getfloatenv("CLARIFAI_TTS_SPEED", None)
     )
+    model_name = "text to speech"
 
     # MODEL PARAMS
 

@@ -6,13 +6,16 @@ from PIL import Image
 import imageio.v3 as iio
 from typing import List
 from io import BytesIO
+from server.logger import CustomLogger
 
+video_processor_logger = CustomLogger("VideoProcessor").get_logger()
 
 class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
     # @profile  # noqa: F821 # type: ignore
     async def process_video(self, video_bytes: bytes) -> np.ndarray:
+        video_processor_logger.info("Began processing video")
         try:
             frames = await asyncio.to_thread(self._bytes_to_frames, video_bytes)
             gray_frames = await asyncio.to_thread(self._grays_scale_image, frames)
@@ -21,9 +24,10 @@ class AsyncVideoProcessor:
             )
             best_frame = frames[best_frame_index]
             # return cv2.resize(best_frame, (0, 0), fx=0.95, fy=0.95)
+            video_processor_logger.info("Finished processing video successfully")
             return best_frame
         except Exception as e:
-            print(f"Error processing video: {e}")
+            video_processor_logger.error("VideoProcessorError", exc_info=True)
             raise e
 
     def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:

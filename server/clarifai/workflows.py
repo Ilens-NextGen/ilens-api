@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from clarifai_grpc.grpc.api.resources_pb2 import Input  # type: ignore[import]
 from clarifai_grpc.grpc.api.service_pb2 import PostWorkflowResultsRequest  # type: ignore[import]
-from server.clarifai.base import BaseWorkflow, Image, Text
+from server.clarifai.base import BaseWorkflow, Image, Text, clarifai_logger
 from typing import Any, TypedDict
 from io import BytesIO
 from server.utils import getenv
@@ -16,6 +16,7 @@ class AudioResponse(TypedDict):
 class ClarifaiMultimodalToSpeechWF(BaseWorkflow[Text | Image, AudioResponse]):
     """A  multimodal workflow that respond with audio"""
 
+    modal_name = "multimodal to speech"
     user_id: str = field(default_factory=lambda: getenv("CLARIFAI_MMTS_USER_ID"))
     app_id: str = field(default_factory=lambda: getenv("CLARIFAI_MMTS_APP_ID"))
     workflow_id: str = field(

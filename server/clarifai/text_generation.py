@@ -25,6 +25,7 @@ class ClarifaiGPT4(BaseModel[Text, TextResponse]):
     max_tokens: Optional[int] = field(
         default_factory=lambda: getintenv("CLARIFAI_GPT4_MAX_TOKENS", None)
     )
+    model_name="text generation"
 
     model_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_GPT4_MODEL_ID", "gpt-4-turbo")

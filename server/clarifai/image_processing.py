@@ -35,6 +35,7 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
     """Clarifai Image Detection Model"""
 
     # MODEL PARAMS
+    model_name = "image processing"
     model_id: str = field(
         default_factory=lambda: getenv(
             "CLARIFAI_DETECTION_MODEL_ID", "general-image-detection"
@@ -122,6 +123,7 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
     user_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_RECOGNITION_USER_ID", "clarifai")
     )
+    model_name="image recognition"
 
     # PREDICTION PARAMS
     selected_concept_names: list[str] = field(

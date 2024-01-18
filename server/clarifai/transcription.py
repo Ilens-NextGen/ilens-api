@@ -13,7 +13,7 @@ class TextResponse(TypedDict):
 @dataclass
 class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
     """Clarifai Speech Transcription Model"""
-
+    model_name = "transcription"
     model_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_MODEL_ID")
     )
