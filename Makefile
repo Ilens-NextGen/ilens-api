@@ -19,7 +19,6 @@ show:             ## Show the current environment.
 init:             ## Initialize the project.
 	@virtualenv -p python3 .venv
 	@poetry install
-	@npm install -g nodemon
 	@sudo add-apt-repository ppa:mc3man/trusty-media
 	@sudo apt-get update
 	@sudo apt-get install ffmpeg
@@ -33,11 +32,7 @@ redis-setup:      ## Setup redis.
 
 .PHONY: run
 run:              ## Run the production server.
-	sanic $$ASGI_APPLICATION
-
-.PHONY: dev
-dev:              ## Run the development server.
-	sanic $$ASGI_APPLICATION --debug
+	python start.py
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
