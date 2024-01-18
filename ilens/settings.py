@@ -29,15 +29,11 @@ SECRET_KEY = "django-insecure-5#=4(z6zrr1b+s$e!@q$6)34qwm^&cn_t5wh$0ugi09re^6@#-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getboolenv("DEBUG", False)
 
-ALLOWED_HOSTS = getlistenv("ALLOWED_HOSTS", [])
-SOCKET_MONITORING = getboolenv("SOCKET_MONITORING", False)
-if DEBUG:
-    ALLOWED_HOSTS.extend(
-        ["localhost", "127.0.0.1", "0.0.0.0"],
-    )
-if SOCKET_MONITORING:
-    ALLOWED_HOSTS.append("admin.socket.io")
-
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "8000-ilensnextgen-ilensapi-miwg4r44eqe.ws-eu107.gitpod.io",
+]
 
 # Application definition
 
@@ -204,8 +200,15 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 # SOCKET_IO
+SOCKET_MONITORING = getboolenv("SOCKET_MONITORING", False)
 SOCKET_LOGGER = getboolenv("SOCKET_LOGGER", DEBUG)
-CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
+CORS_ALLOWED_ORIGINS = getlistenv("CORS_ALLOWED_ORIGINS", [])
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.extend(
+        ["localhost", "127.0.0.1"],
+    )
+if SOCKET_MONITORING:
+    CORS_ALLOWED_ORIGINS.append("https://admin.socket.io")
 
 # the async model to use.
 SOCKET_ASYNC_MODE = getenv("ASYNC_MODE", "asgi")
