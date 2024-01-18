@@ -14,12 +14,14 @@ from clarifai_grpc.grpc.api.status import status_code_pb2  # type: ignore[import
 from clarifai_grpc.grpc.api.status.status_pb2 import Status  # type: ignore[import]
 from server.logger import CustomLogger
 from functools import wraps
+
 Image: TypeAlias = resources_pb2.Image
 Video: TypeAlias = resources_pb2.Video
 Audio: TypeAlias = resources_pb2.Audio
 Text: TypeAlias = resources_pb2.Text
 Concept: TypeAlias = resources_pb2.Concept
 clarifai_logger = CustomLogger("Clarifai").get_logger()
+
 
 class _SupportsReadSeekTell(Protocol):
     def read(self, __n: int = ...) -> bytes:
@@ -66,8 +68,10 @@ def media_from_text(type: Type[MediaType], text: str, **kwargs) -> MediaType:
         raise ValueError("Only Text media type supports text.")
     return type(raw=text, **kwargs)
 
-def logger(model_name = "", model_id = ""):
+
+def logger(model_name="", model_id=""):
     """Logger for my run function"""
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -75,12 +79,21 @@ def logger(model_name = "", model_id = ""):
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
-                clarifai_logger.error(f"Error running {model_name} model with id {model_id}", exc_info=True)
+                clarifai_logger.error(
+                    f"Error running {model_name} model with id {model_id}",
+                    exc_info=True,
+                )
                 raise e
-            clarifai_logger.info(f"Finished running {model_name} model with id {model_id}")
+            clarifai_logger.info(
+                f"Finished running {model_name} model with id {model_id}"
+            )
             return result
+
         return wrapper
+
     return decorator
+
+
 @dataclass
 class BaseModel(Generic[MediaType, ResponseType]):
     model_id: str
@@ -93,6 +106,15 @@ class BaseModel(Generic[MediaType, ResponseType]):
     """The model version id."""
     """A name describing the model's function"""
     pat: str = field(default_factory=lambda: getenv("CLARIFAI_PAT"))
+
+    @property
+    def model_name(self) -> str:
+        """Returns the model name."""
+        return "{app}/{model}@{user}".format(
+            model=self.model_id,
+            app=self.app_id,
+            user=self.user_id,
+        )
 
     def _get_metadata(self) -> dict[str, str]:
         """Returns the metadata for the request."""
@@ -234,8 +256,6 @@ class BaseModel(Generic[MediaType, ResponseType]):
     def handle_error(self, error: Status) -> None:
         raise Exception(f"{error.description}")
 
-
-
     def run(self, *data: dict[str, MediaType]) -> list[ResponseType]:
         @logger(model_name=self.model_name, model_id=self.model_id)
         def main_run(*data: dict[str, MediaType]) -> list[ResponseType]:
@@ -248,12 +268,14 @@ class BaseModel(Generic[MediaType, ResponseType]):
                 return []
             else:
                 return self.parse_outputs(response.outputs)
+
         return main_run(*data)
 
 
 @dataclass
 class BaseWorkflow(Generic[MediaType, ResponseType]):
     """A clarifai workflow."""
+
     user_id: str
     """The user id."""
     app_id: str
@@ -261,6 +283,15 @@ class BaseWorkflow(Generic[MediaType, ResponseType]):
     workflow_id: str
     """The workflow id."""
     pat: str = field(default_factory=lambda: getenv("CLARIFAI_PAT"))
+
+    @property
+    def model_name(self) -> str:
+        """Returns the model name."""
+        return "{workflow}/{app}@{user}".format(
+            workflow=self.workflow_id,
+            app=self.app_id,
+            user=self.user_id,
+        )
 
     # @profile  # noqa: F821 # type: ignore
     def _create_channel(
@@ -319,7 +350,8 @@ class BaseWorkflow(Generic[MediaType, ResponseType]):
     # @profile  # noqa: F821 # type: ignore
     def run(self, *data: dict[str, MediaType]) -> list[ResponseType]:
         """Runs the workflow on the data."""
-        @logger(model_name=self.model_name, model_id=self.model_id)
+
+        @logger(model_name=self.model_name, model_id=self.workflow_id)
         def main_run(*data: dict[str, MediaType]) -> list[ResponseType]:
             inputs = [self._create_input(d) for d in data]
             request = self._create_workflow_request(inputs)
@@ -330,4 +362,5 @@ class BaseWorkflow(Generic[MediaType, ResponseType]):
                 return []
             else:
                 return self.parse_outputs(response.results)
+
         return main_run(*data)

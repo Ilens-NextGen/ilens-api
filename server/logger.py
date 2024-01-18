@@ -1,6 +1,7 @@
 import logging
 import functools
 
+
 class CustomLogger:
     def __init__(self, logger_name, file_logging=False, file_name="app.log"):
         self.logger = logging.getLogger(logger_name)
@@ -11,7 +12,10 @@ class CustomLogger:
         ch.setLevel(logging.DEBUG)  # Set the logging level for the console handler
 
         # Create a formatter
-        formatter = logging.Formatter('[%(asctime)s] [%(process)d] [%(levelname)s] [%(name)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S %z')
+        formatter = logging.Formatter(
+            "[%(asctime)s] [%(process)d] [%(levelname)s] [%(name)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S %z",
+        )
 
         # Add the formatter to the console handler
         ch.setFormatter(formatter)
@@ -32,14 +36,19 @@ class CustomLogger:
 
     def get_logger(self):
         return self.logger
-    
+
     def decorate(self, func, start_msg="Starting", end_msg="Ending", level="info"):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             self.logger.info
-            self.logger.info(f"Calling {func.__name__} with args {args} and kwargs {kwargs}")
+            self.logger.info(
+                f"Calling {func.__name__} with args {args} and kwargs {kwargs}"
+            )
             return func(*args, **kwargs)
+
         return wrapper
+
+
 def decorate(self, func, start_msg="Starting", end_msg=None):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -52,4 +61,5 @@ def decorate(self, func, start_msg="Starting", end_msg=None):
             raise e
         if end_msg:
             self.logger.info(end_msg)
+
     return wrapper
