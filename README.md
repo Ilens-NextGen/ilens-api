@@ -25,9 +25,5 @@ source ./activate
 
 ### 5. Run The Project
 ```bash
-# Run the development server
-make dev
-
-# Run the production server
 make run
 ```

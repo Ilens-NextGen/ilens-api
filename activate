@@ -30,6 +30,6 @@ alias deactivate="unset PIPENV_ACTIVE ENV_PREFIX; unalias deactivate; deactivate
 # if the .env file exists and is not empty
 if [ -s "$DOTENV_FILE" ]; then
 	echo "Loading environment variables from $DOTENV_FILE"
-	export $(cat $DOTENV_FILE | xargs)
+	export $(grep -v '^#' $DOTENV_FILE | xargs -d '\n')
 fi
 unset DOTENV_FILE
