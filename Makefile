@@ -33,11 +33,11 @@ redis-setup:      ## Setup redis.
 
 .PHONY: run
 run:              ## Run the production server.
-	python3 start.py $$ASGI_APPLICATION
+	sanic $$ASGI_APPLICATION
 
 .PHONY: dev
 dev:              ## Run the development server.
-	nodemon -x 'python3 start.py $$ASGI_APPLICATION' -e py
+	sanic $$ASGI_APPLICATION --debug
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.

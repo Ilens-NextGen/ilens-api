@@ -1,0 +1,2 @@
+sanic[ext]
+websocket-client

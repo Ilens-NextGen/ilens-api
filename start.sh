@@ -8,7 +8,7 @@ host=${HOST:-0.0.0.0}
 port=${PORT:-8000}
 
 # application to serve
-asgi_app=${ASGI_APP:-"ilens.asgi:application"}
+asgi_app=${ASGI_APP:-"app:app"}
 
 # maximum time to allow websocket to be connected. -1 for infinite
 socket_timeout=$WEBSOCKET_TIMEOUT

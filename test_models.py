@@ -1,5 +1,5 @@
 from pathlib import Path
-from ilens.clarifai import (
+from server.clarifai import (
     ClarifaiTextToSpeech,
     Text,
     Audio,
@@ -37,7 +37,7 @@ logging.info("Audio saved.")
 logging.info("Transcribing audio...")
 story_audio.seek(0)
 story_bytes = story_audio.read()
-story_transcript = stt.run({"audio": Audio(base64=Path("morning.wav").read_bytes())})[
+story_transcript = stt.run({"audio": Audio(base64=Path("audio.wav").read_bytes())})[
     0
 ]["text"]
 logging.info("Transcript generated: %s", story_transcript)
