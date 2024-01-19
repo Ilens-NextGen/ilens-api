@@ -1,18 +1,35 @@
 from server.utils import getboolenv, getenv, getintenv, getlistenv, loadenv
+from socket import gethostname
 
 # load the environment variables from the env file if it exists
 loadenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+# if the server is running in debug mode
 DEBUG = getboolenv("DEBUG", False)
 
+# the port to run the server on
+SERVER_ID = getenv("SERVER_ID", gethostname())
+
+# if we should monitor the socket connections
+SOCKET_MONITORING = getboolenv("SOCKET_MONITORING", False)
+
+# the allowed hosts for the server
 ALLOWED_HOSTS = getlistenv("ALLOWED_HOSTS", [])
+
+
 if DEBUG:
+    # allow local connections in debug mode
     ALLOWED_HOSTS.extend(
         ["localhost", "127.0.0.1", "0.0.0.0"],
     )
+
+if SOCKET_MONITORING:
+    # allow the monitoring client to connect
+    ALLOWED_HOSTS.append("admin.socket.io")
+
+SOCKET_ADMIN_USERNAME = getenv("SOCKET_ADMIN_USERNAME", None)
+SOCKET_ADMIN_PASSWORD = getenv("SOCKET_ADMIN_PASSWORD", None)
 
 
 SOCKET_LOGGER = getboolenv("SOCKET_LOGGER", DEBUG)
