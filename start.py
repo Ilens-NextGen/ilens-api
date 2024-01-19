@@ -7,6 +7,7 @@ from sanic.__main__ import main as sanic  # noqa: F401
 
 
 def main() -> Optional[int]:
+    loadenv()
     args: dict[str, Any] = {}
 
     # Application

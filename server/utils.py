@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from functools import wraps
 from logging import getLogger
+import sys
 import time
 from typing import (
     Any,
@@ -19,6 +20,42 @@ T = TypeVar("T", bound=Any)
 P = ParamSpec("P")
 R = TypeVar("R")
 MISSING = object()
+
+
+def _extract_env_vars(text: str) -> dict[str, str]:
+    """Extract environment variables from a string."""
+    env_vars = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        name, value = line.split("=", 1)
+        env_vars[name.strip()] = value.strip()
+    return env_vars
+
+
+def loadenv(override: bool = False):
+    """Load the environment variables from the env file"""
+
+    if getboolenv("ENV_LOADED", False):
+        return
+    env_file = getenv("ENV_FILE", ".env")
+    if os.path.exists(env_file):
+        try:
+            with open(env_file) as f:
+                env_vars = _extract_env_vars(f.read())
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load environment variables from {env_file!r}"
+            ) from e
+        for name, value in env_vars.items():
+            if override or name not in os.environ:
+                os.environ[name] = value
+            else:
+                os.environ.setdefault(name, value)
+        os.environ["ENV_LOADED"] = "True"
+    else:
+        sys.stderr.write(f"Warning: {env_file!r} does not exist.\n")
 
 
 @overload

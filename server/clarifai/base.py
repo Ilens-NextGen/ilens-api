@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import io
 from pathlib import Path
 from typing import Any, Generic, Optional, Protocol, Type, TypeAlias, TypeVar, Union
-from server.utils import getenv
+from server.utils import getenv, loadenv
 import clarifai_grpc.grpc.api.resources_pb2 as resources_pb2  # type: ignore[import]
 import clarifai_grpc.grpc.api.service_pb2 as service_pb2  # type: ignore[import]
 import clarifai_grpc.grpc.api.service_pb2_grpc as service_pb2_grpc  # type: ignore[import]
@@ -21,6 +21,8 @@ Audio: TypeAlias = resources_pb2.Audio
 Text: TypeAlias = resources_pb2.Text
 Concept: TypeAlias = resources_pb2.Concept
 clarifai_logger = CustomLogger("Clarifai").get_logger()
+
+loadenv()
 
 
 class _SupportsReadSeekTell(Protocol):
