@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Any, Optional
-from server.utils import getboolenv, getenv, getintenv, getlistenv
+from server.utils import getboolenv, getenv, getintenv, getlistenv, loadenv
 import sys
 from sanic.__main__ import main as sanic  # noqa: F401
 
@@ -25,13 +25,13 @@ def main() -> Optional[int]:
     args["--unix"] = getenv("UNIX", None)
 
     # TSL certificate
-    args["--cert"] = getenv("CERT", '/etc/letsencrypt/live/ilens.allcanlearn.me/fullchain.pem')
-    args["--key"] = getenv("KEY", '/etc/letsencrypt/live/ilens.allcanlearn.me/privkey.pem')
+    args["--cert"] = getenv("CERT", None)
+    args["--key"] = getenv("KEY", None)
     args["--tls"] = getlistenv("TLS", [])
     args["--tls-strict-host"] = getboolenv("TLS_STRICT_HOST", False)
 
     # Worker
-    args["--workers"] = getintenv("SANIC_WORKERS", 2)
+    args["--workers"] = getintenv("SANIC_WORKERS", 1)
     args["--fast"] = getboolenv("SANIC_FAST", False)
     args["--single-process"] = getboolenv("SANIC_SINGLE_PROCESS", False)
     args["--access-logs"] = getboolenv("SANIC_ACCESS_LOGS", True)
