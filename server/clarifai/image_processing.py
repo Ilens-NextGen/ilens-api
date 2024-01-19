@@ -27,7 +27,7 @@ class ObjectRecognitionInfo(TypedDict):
 
     id: str
     name: str
-    value: float
+    confidence: float
 
 
 @dataclass
@@ -164,7 +164,7 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
             object_info: ObjectRecognitionInfo = {
                 "id": concept.id,
                 "name": concept.name,
-                "value": round(concept.value, 4),
+                "confidence": round(concept.value, 4),
             }
             result.append(object_info)
         return result
