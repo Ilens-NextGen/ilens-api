@@ -20,11 +20,11 @@ async def connect(sid, environ):
     websocket_logger.info(f"Connected {sid}")
 
 @sio.event
-@timed.async_("Handle Clip")
-async def clip(sid, blob: bytes, duration: float):
+@timed.async_("Handle Recognition")
+async def recognize(sid, blob: bytes, duration: float):
     websocket_logger.info("Clip processing began")
     try:
-        async with timed("Image Selection For Detector"):
+        async with timed("Image Selection For Recognizer"):
             best_frame = await image_processor.process_video(blob)
             image_bytes = image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
@@ -38,6 +38,32 @@ async def clip(sid, blob: bytes, duration: float):
         await sio.emit(
             "recognition",
             recognition,
+            to=sid,
+        )
+    except Exception as e:
+        websocket_logger.error(f"WebsocketError", exc_info=True)
+        raise e
+    websocket_logger.info("Clip successfully processed")
+
+@sio.event
+@timed.async_("Handle Detection")
+async def detect(sid, clip: bytes):
+    websocket_logger.info("Clip processing began")
+    try:
+        async with timed("Image Selection For Detector"):
+            best_frame = await image_processor.process_video(clip)
+            image_bytes = image_bytes = await asyncio.to_thread(
+                image_processor.convert_result_image_to_bytes, best_frame
+            )
+        detection = (
+            await asyncio.to_thread(
+                timed("Image Recognition")(image_recognition.run),
+                {"image": Image(base64=image_bytes)},
+            )
+        )[0]
+        await sio.emit(
+            "detection",
+            detection,
             to=sid,
         )
     except Exception as e:
