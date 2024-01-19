@@ -1,5 +1,6 @@
 __pycache__
 .env
+.env.*
 *.wav
 test_*.py
 node_modules
@@ -13,3 +14,5 @@ timed.txt
 *.mp4
 socky
 *.png
+*.log
+*.log.backup
