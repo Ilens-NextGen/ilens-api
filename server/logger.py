@@ -1,39 +1,67 @@
 import logging
 import functools
+from rich.logging import RichHandler
+
 from server.utils import getlistenv, loadenv, getenv, getboolenv
 
 loadenv()
 
+debug = getboolenv("DEBUG", False)
+log_fmt = getenv(
+    "LOG_FORMAT", "[%(asctime)s] [%(process)d] [%(levelname)s] [%(name)s] %(message)s"
+)
+log_keywords = getlistenv("LOG_KEYWORDS", []) + [
+    "INFO",
+    "DEBUG",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
+]
+
+date_fmt = getenv("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S %z")
+log_file = getenv("LOG_FILE", "ilens_server.log")
+log_level = getenv("LOG_LEVEL", "DEBUG")
+log_to_file = getboolenv("LOG_TO_FILE", True)
+
+formatter = logging.Formatter(log_fmt, date_fmt)
+stream_handler = RichHandler(
+    level=log_level,
+    show_time=False,
+    show_path=False,
+    show_level=False,
+    rich_tracebacks=True,
+    markup=False,
+    tracebacks_show_locals=debug,
+    keywords=log_keywords,
+)
+stream_handler.setFormatter(formatter)
+
+logging.basicConfig(
+    level=log_level,
+    format=log_fmt,
+    datefmt=date_fmt,
+    handlers=[],
+)
+
 
 class CustomLogger:
-    def __init__(self, logger_name, file_logging=True, file_name="ilens_server.log"):
+    def __init__(
+        self, logger_name, file_logging=log_to_file, file_name="ilens_server.log"
+    ):
         self.logger = logging.getLogger(logger_name)
-        self.logger.setLevel(logging.DEBUG)  # Set the logging level
-
-        # Create a console handler
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)  # Set the logging level for the console handler
-
-        # Create a formatter
-        formatter = logging.Formatter(
-            "[%(asctime)s] [%(process)d] [%(levelname)s] [%(name)s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S %z",
-        )
-
-        # Add the formatter to the console handler
-        ch.setFormatter(formatter)
-
-        # Add the console handler to the logger
-        self.logger.addHandler(ch)
+        self.logger.setLevel(log_level)  # Set the logging level
+        # Prevent the log messages from being duplicated in the python.log file
+        self.logger.propagate = False
+        # Add the stream handler to the logger
+        self.logger.addHandler(stream_handler)
 
         if file_logging:
             # Create a file handler
             fh = logging.FileHandler(file_name)
-            fh.setLevel(logging.DEBUG)  # Set the logging level for the file handler
-
+            # Set the logging level for the file handler
+            fh.setLevel(log_level)
             # Add the formatter to the file handler
             fh.setFormatter(formatter)
-
             # Add the file handler to the logger
             self.logger.addHandler(fh)
 
