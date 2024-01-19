@@ -17,18 +17,10 @@ show:             ## Show the current environment.
 
 .PHONY: init
 init:             ## Initialize the project.
-	@python -m virtualenv -p python .venv
-	@python -m poetry install
+	@pip install -r requirements.txt
 	@sudo add-apt-repository ppa:mc3man/trusty-media
 	@sudo apt-get update
 	@sudo apt-get install ffmpeg
-
-
-.PHONY: redis-setup
-redis-setup:      ## Setup redis.
-	@sudo apt-get install redis-server
-	@sudo service redis-server start
-
 
 .PHONY: run
 run:              ## Run the production server.

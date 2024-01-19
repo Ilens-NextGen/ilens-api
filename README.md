@@ -12,18 +12,12 @@ This is the backend API for the iLens project.
 pip install poetry
 ```
 
-### 3. Create Virtual Environment & Install Dependencies
+### 3. Install Dependencies
 ```bash
 make install
 ```
 
-### 4. Activate Virtual Environment
-```bash
-source ./activate
-```
-> This also exports all variables in the .env file to the environment.
-
-### 5. Run The Project
+### 4. Run The Project
 ```bash
 make run
 ```
