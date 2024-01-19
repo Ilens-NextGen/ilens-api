@@ -21,11 +21,11 @@ async def connect(sid, environ):
 
 @sio.event
 @timed.async_("Handle Recognition")
-async def recognize(sid, blob: bytes, duration: float):
+async def recognize(sid, clip: bytes):
     websocket_logger.info("Clip processing began")
     try:
         async with timed("Image Selection For Recognizer"):
-            best_frame = await image_processor.process_video(blob)
+            best_frame = await image_processor.process_video(clip)
             image_bytes = image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
