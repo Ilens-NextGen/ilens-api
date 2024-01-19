@@ -20,6 +20,7 @@ sanic = {extras = ["ext"], version = "^23.12.1"}
 httpx = "^0.26.0"
 sanic-cors = "^2.2.0"
 dynaconf = "^3.2.4"
+rich = "^13.7.0"
 
 
 [tool.poetry.group.dev.dependencies]
