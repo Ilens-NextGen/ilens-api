@@ -1,0 +1,4 @@
+[2024-01-19 18:48:07 +0000] [78284] [INFO] [Websocket] Connected nVT_jQ4E7KOoGRINAAAB
+[2024-01-19 18:48:28 +0000] [78284] [INFO] [Websocket] Got a query sent as audio of 35.3955078125KB and a clip of 60.6611328125KB
+[2024-01-19 18:48:28 +0000] [78284] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 18:48:28 +0000] [78284] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english

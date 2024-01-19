@@ -17,8 +17,8 @@ show:             ## Show the current environment.
 
 .PHONY: init
 init:             ## Initialize the project.
-	@virtualenv -p python3 .venv
-	@poetry install
+	@python -m virtualenv -p python .venv
+	@python -m poetry install
 	@sudo add-apt-repository ppa:mc3man/trusty-media
 	@sudo apt-get update
 	@sudo apt-get install ffmpeg

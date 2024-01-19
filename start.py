@@ -24,13 +24,13 @@ def main() -> Optional[int]:
     args["--unix"] = getenv("UNIX", None)
 
     # TSL certificate
-    args["--cert"] = getenv("CERT", None)
-    args["--key"] = getenv("KEY", None)
+    args["--cert"] = getenv("CERT", '/etc/letsencrypt/live/ilens.allcanlearn.me/fullchain.pem')
+    args["--key"] = getenv("KEY", '/etc/letsencrypt/live/ilens.allcanlearn.me/privkey.pem')
     args["--tls"] = getlistenv("TLS", [])
     args["--tls-strict-host"] = getboolenv("TLS_STRICT_HOST", False)
 
     # Worker
-    args["--workers"] = getintenv("SANIC_WORKERS", 1)
+    args["--workers"] = getintenv("SANIC_WORKERS", 2)
     args["--fast"] = getboolenv("SANIC_FAST", False)
     args["--single-process"] = getboolenv("SANIC_SINGLE_PROCESS", False)
     args["--access-logs"] = getboolenv("SANIC_ACCESS_LOGS", True)

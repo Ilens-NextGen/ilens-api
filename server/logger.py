@@ -3,7 +3,7 @@ import functools
 
 
 class CustomLogger:
-    def __init__(self, logger_name, file_logging=False, file_name="app.log"):
+    def __init__(self, logger_name, file_logging=True, file_name="ilens_server.log"):
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(logging.DEBUG)  # Set the logging level
 

@@ -1,0 +1,108 @@
+[2024-01-19 16:46:22 +0000] [77017] [INFO] [Websocket] Connected TYAI5P_8RsdIoYoSAAAB
+[2024-01-19 16:46:40 +0000] [77017] [INFO] [Websocket] Clip processing began
+[2024-01-19 16:46:40 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:46:46 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:46:46 +0000] [77017] [INFO] [Clarifai] Running image recognition model with id general-image-recognition
+[2024-01-19 16:46:48 +0000] [77017] [INFO] [Clarifai] Finished running image recognition model with id general-image-recognition
+[2024-01-19 16:46:48 +0000] [77017] [INFO] [Websocket] Clip successfully processed
+[2024-01-19 16:46:55 +0000] [77017] [INFO] [Websocket] Clip processing began
+[2024-01-19 16:46:55 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:46:55 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:46:56 +0000] [77017] [INFO] [Clarifai] Running image recognition model with id general-image-recognition
+[2024-01-19 16:46:56 +0000] [77017] [INFO] [Clarifai] Finished running image recognition model with id general-image-recognition
+[2024-01-19 16:46:56 +0000] [77017] [INFO] [Websocket] Clip successfully processed
+[2024-01-19 16:47:04 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 0.0KB and a clip of 196.94140625KB
+[2024-01-19 16:47:04 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:47:04 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:47:04 +0000] [77017] [ERROR] [Clarifai] Error running transcription model with id asr-wav2vec2-base-960h-english
+Traceback (most recent call last):
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 80, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 267, in main_run
+    self.handle_error(response.status)
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 257, in handle_error
+    raise Exception(f"{error.description}")
+Exception: Input invalid argument
+[2024-01-19 16:47:04 +0000] [77017] [ERROR] [Websocket] WebsocketError
+Traceback (most recent call last):
+  File "/home/ubuntu/projects/ilens-api/server/utils.py", line 292, in wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/consumers.py", line 91, in get_transcript
+    await asyncio.to_thread(
+  File "/usr/local/lib/python3.11/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 272, in run
+    return main_run(*data)
+           ^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 86, in wrapper
+    raise e
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 80, in wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 267, in main_run
+    self.handle_error(response.status)
+  File "/home/ubuntu/projects/ilens-api/server/clarifai/base.py", line 257, in handle_error
+    raise Exception(f"{error.description}")
+Exception: Input invalid argument
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/projects/ilens-api/server/consumers.py", line 100, in query
+    image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/projects/ilens-api/server/utils.py", line 296, in wrapper
+    self.interrupt()
+  File "/home/ubuntu/projects/ilens-api/server/utils.py", line 230, in interrupt
+    self.interrupt_output.format(name=self.name, seconds=self._interval)
+IndexError: Replacement index 0 out of range for positional args tuple
+[2024-01-19 16:47:04 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:47:10 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 37.171875KB and a clip of 156.6044921875KB
+[2024-01-19 16:47:10 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:47:10 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:47:10 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:47:20 +0000] [77017] [INFO] [Clarifai] Finished running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:47:20 +0000] [77017] [INFO] [Clarifai] Running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:47:40 +0000] [77017] [INFO] [Clarifai] Finished running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:47:40 +0000] [77017] [INFO] [Websocket] Query successfully processed. Got 1552.556640625KB audio
+[2024-01-19 16:48:43 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 37.171875KB and a clip of 156.4892578125KB
+[2024-01-19 16:48:43 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:48:43 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:48:43 +0000] [77017] [INFO] [Clarifai] Finished running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:48:43 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:48:44 +0000] [77017] [INFO] [Clarifai] Running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:48:53 +0000] [77017] [INFO] [Clarifai] Finished running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:48:53 +0000] [77017] [INFO] [Websocket] Query successfully processed. Got 1818.056640625KB audio
+[2024-01-19 16:50:18 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 40.91015625KB and a clip of 160.06640625KB
+[2024-01-19 16:50:18 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:50:18 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:50:18 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:50:18 +0000] [77017] [INFO] [Clarifai] Finished running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:50:19 +0000] [77017] [INFO] [Clarifai] Running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:50:26 +0000] [77017] [INFO] [Clarifai] Finished running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:50:26 +0000] [77017] [INFO] [Websocket] Query successfully processed. Got 1284.806640625KB audio
+[2024-01-19 16:54:50 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 29.54296875KB and a clip of 166.7333984375KB
+[2024-01-19 16:54:50 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:54:50 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:54:50 +0000] [77017] [INFO] [Clarifai] Finished running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:54:50 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:54:51 +0000] [77017] [INFO] [Clarifai] Running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:54:56 +0000] [77017] [INFO] [Clarifai] Finished running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:54:56 +0000] [77017] [INFO] [Websocket] Query successfully processed. Got 816.806640625KB audio
+[2024-01-19 16:57:11 +0000] [77017] [INFO] [Websocket] Connected UKS774Q_YoTl_oK6AAAD
+[2024-01-19 16:57:12 +0000] [77017] [INFO] [Websocket] Disconnected UKS774Q_YoTl_oK6AAAD
+[2024-01-19 16:57:20 +0000] [77017] [INFO] [Websocket] Connected BijRqAHCSEwOGWaWAAAF
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [Websocket] Got a query sent as audio of 34.2939453125KB and a clip of 185.677734375KB
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [VideoProcessor] Began processing video
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [Clarifai] Running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [VideoProcessor] Finished processing video successfully
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [Clarifai] Finished running transcription model with id asr-wav2vec2-base-960h-english
+[2024-01-19 16:57:26 +0000] [77017] [INFO] [Clarifai] Running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:57:31 +0000] [77017] [INFO] [Clarifai] Finished running user-query/iLens@davemcsavvy model with id user-query
+[2024-01-19 16:57:31 +0000] [77017] [INFO] [Websocket] Query successfully processed. Got 198.056640625KB audio
