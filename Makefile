@@ -39,3 +39,13 @@ lint:             ## Run pep8, black, mypy linters.
 	$(ENV_PREFIX)/ruff check $(FILES) || exit $$?
 	$(ENV_PREFIX)/black --check $(FILES) || exit $$?
 	$(ENV_PREFIX)/mypy $(FILES) || exit $$?
+
+.PHONY: format
+format:           ## Run pep8, black, mypy formatters.
+	$(ENV_PREFIX)/ruff format $(FILES) || exit $$?
+	$(ENV_PREFIX)/black $(FILES) || exit $$?
+	$(ENV_PREFIX)/mypy $(FILES) || exit $$?
+
+.PHONY: requirements
+requirements:     ## Generate requirements.txt.
+	@poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev
