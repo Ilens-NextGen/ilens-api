@@ -1,5 +1,6 @@
 from sanic import Sanic
 from sanic.response import text
+from server.settings import SERVER_ID
 
 
 class ILens(Sanic):
@@ -11,7 +12,7 @@ app = ILens("Ilens")
 
 @app.get("/")
 async def hello_world(request):
-    return text("Hello, world.")
+    return text(f"Hello, World! from {SERVER_ID}")
 
 
 def create_app():
