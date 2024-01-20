@@ -15,9 +15,11 @@ image_processor = AsyncVideoProcessor()
 
 websocket_logger = CustomLogger("Websocket").get_logger()
 
+
 @sio.event
 async def connect(sid, environ):
     websocket_logger.info(f"Connected {sid}")
+
 
 @sio.event
 @timed.async_("Handle Recognition")
@@ -41,9 +43,10 @@ async def recognize(sid, clip: bytes):
             to=sid,
         )
     except Exception as e:
-        websocket_logger.error(f"WebsocketError", exc_info=True)
+        websocket_logger.error("WebsocketError", exc_info=True)
         raise e
     websocket_logger.info("Clip successfully processed")
+
 
 @sio.event
 @timed.async_("Handle Detection")
@@ -67,15 +70,19 @@ async def detect(sid, clip: bytes):
             to=sid,
         )
     except Exception as e:
-        websocket_logger.error(f"WebsocketError", exc_info=True)
+        websocket_logger.error("WebsocketError", exc_info=True)
         raise e
     websocket_logger.info("Clip successfully processed")
+
 
 @sio.event
 # @profile  # noqa: F821 # type: ignore
 @timed.async_("Handle Query")
 async def query(sid, audio: bytes, clip: bytes):
-    websocket_logger.info(f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB")
+    websocket_logger.info(
+        f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB"
+    )
+
     @timed.async_("Image Selection For Query")
     async def get_image():
         best_frame = await image_processor.process_video(clip)
@@ -96,9 +103,18 @@ async def query(sid, audio: bytes, clip: bytes):
             )
         )[0]["text"]
         return transcript
+
     try:
         image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
-
+        if not transcript:
+            websocket_logger.info("No transcript found")
+            return await sio.emit("no-audio", to=sid)
+        if len(transcript) > 500:
+            websocket_logger.info("Transcript too long")
+            return await sio.emit("long-audio", to=sid)
+        elif len(transcript) < 10:
+            websocket_logger.info("Transcript too short")
+            return await sio.emit("short-audio", to=sid)
         audio_stream = (
             await asyncio.to_thread(
                 timed("MultiModal To Speech")(llm_workflow.run),
@@ -110,10 +126,12 @@ async def query(sid, audio: bytes, clip: bytes):
         )[0]["audio"]
         audio_bytes = audio_stream.getvalue()
     except Exception as e:
-        websocket_logger.error(f"WebsocketError", exc_info=True)
+        websocket_logger.error("WebsocketError", exc_info=True)
         raise e
     await sio.emit("audio", audio_bytes, to=sid)
-    websocket_logger.info(f"Query successfully processed. Got {len(audio_bytes) / 1024}KB audio")
+    websocket_logger.info(
+        f"Query successfully processed. Got {len(audio_bytes) / 1024}KB audio"
+    )
 
 
 @sio.event
