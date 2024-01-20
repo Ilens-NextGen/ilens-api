@@ -3,7 +3,7 @@ from server.clarifai import ClarifaiTranscription, Audio
 from server.clarifai import Text
 from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
 from server.clarifai.image_processor import AsyncVideoProcessor
-from server.clarifai import Image, ClarifaiImageRecognition
+from server.clarifai import Image, ClarifaiImageRecognition, ClarifaiImageDetection
 from server.socket import server as sio
 from server.utils import timed
 from server.logger import CustomLogger
@@ -12,7 +12,7 @@ image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
 llm_workflow = ClarifaiMultimodalToSpeechWF()
 image_processor = AsyncVideoProcessor()
-
+image_detection = ClarifaiImageDetection()
 websocket_logger = CustomLogger("Websocket").get_logger()
 
 
@@ -28,7 +28,7 @@ async def recognize(sid, clip: bytes):
     try:
         async with timed("Image Selection For Recognizer"):
             best_frame = await image_processor.process_video(clip)
-            image_bytes = image_bytes = await asyncio.to_thread(
+            image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
         recognition = (
@@ -55,15 +55,20 @@ async def detect(sid, clip: bytes):
     try:
         async with timed("Image Selection For Detector"):
             best_frame = await image_processor.process_video(clip)
-            image_bytes = image_bytes = await asyncio.to_thread(
+            image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
         detection = (
             await asyncio.to_thread(
-                timed("Image Recognition")(image_recognition.run),
+                timed("Image Recognition")(image_detection.run),
                 {"image": Image(base64=image_bytes)},
             )
-        )[0]
+        )
+        result = (await asyncio.to_thread(
+                timed("Interpreting results")(image_detection.interpret), 
+                detection
+            )
+        )
         await sio.emit(
             "detection",
             detection,

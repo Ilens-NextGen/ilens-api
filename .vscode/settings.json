@@ -13,7 +13,7 @@
             "source.organizeImports": "explicit",
             "source.fixAll.ruff": "explicit"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "geecode.geecode-python",
     },
     "ruff.importStrategy": "fromEnvironment",
     "ruff.organizeImports": false,

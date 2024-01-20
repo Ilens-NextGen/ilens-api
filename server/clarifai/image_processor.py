@@ -1,11 +1,13 @@
 import asyncio
+from io import BytesIO
 from math import floor
+from typing import List
+
 import cv2
+import imageio.v3 as iio
 import numpy as np
 from PIL import Image
-import imageio.v3 as iio
-from typing import List
-from io import BytesIO
+
 from server.logger import CustomLogger
 
 video_processor_logger = CustomLogger("VideoProcessor").get_logger()
@@ -61,3 +63,5 @@ class AsyncVideoProcessor:
         # final_size = len(image_bytes) / 1024
         # print(f"Image size reduced from {initial_size}KB to {final_size}KB")
         return image_bytes
+    
+    
