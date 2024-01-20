@@ -10,7 +10,7 @@ PROJECT_REPO = "https://github.com/Ilens-NextGen/ilens-api.git"
 PROJECT_SRC = "/home/ubuntu/projects/ilens-api"
 PROJECT_BRANCH = "main"
 SERVICE_FILE = "/etc/systemd/system/ilens.service"
-LOGGLY_TOKEN = "8e34c5d3-1db4-4af8-9975-0aaa2067f207"
+LOGGLY_TOKEN = ""
 
 
 def ensure_local():
