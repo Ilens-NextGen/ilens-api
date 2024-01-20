@@ -1,7 +1,16 @@
 from dataclasses import dataclass, field
 from typing import Any, Optional, TypedDict
-from server.clarifai.base import BaseModel, Image, Concept
+
+from server.clarifai.base import BaseModel, Concept, Image
 from server.utils import getenv, getfloatenv, getintenv, getlistenv
+
+DEFAULT_OBSTACLES = [
+    "man", "woman", "boy", "girl", "car", "bus",
+    "lorry", "truck", "tree", "table", "chair",
+    "door", "bicycle", "motorcycle", "bike",
+    "traffic light", "traffic sign", "stop sign",
+    "parking meter", "bench", "wall", "wardrobe", "bed"
+]
 
 
 class LocationInfo(TypedDict):
@@ -35,20 +44,22 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
     """Clarifai Image Detection Model"""
 
     # MODEL PARAMS
-    model_name = "image processing"
+    model_name = "obstacle detection"
     model_id: str = field(
         default_factory=lambda: getenv(
             "CLARIFAI_DETECTION_MODEL_ID", "general-image-detection"
         )
     )
     model_version_id: Optional[str] = field(
-        default_factory=lambda: getenv("CLARIFAI_DETECTION_MODEL_VERSION_ID", None)
+        default_factory=lambda: getenv(
+            "CLARIFAI_DETECTION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_DETECTION_APP_ID", "main")
     )
     user_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_DETECTION_USER_ID", "clarifai")
+        default_factory=lambda: getenv(
+            "CLARIFAI_DETECTION_USER_ID", "clarifai")
     )
 
     # PREDICTION PARAMS
@@ -63,10 +74,16 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         )
     )
     max_concepts: Optional[int] = field(
-        default_factory=lambda: getintenv("CLARIFAI_DETECTION_MAX_CONCEPTS", None)
+        default_factory=lambda: getintenv(
+            "CLARIFAI_DETECTION_MAX_CONCEPTS", None)
     )
     minimum_value: Optional[float] = field(
-        default_factory=lambda: getfloatenv("CLARIFAI_DETECTION_MINIMUM_VALUE", None)
+        default_factory=lambda: getfloatenv(
+            "CLARIFAI_DETECTION_MINIMUM_VALUE", None)
+    )
+    max_distance_threshold: Optional[float] = field(
+        default_factory=lambda: getfloatenv(
+            "CLARIFAI_DETECTION_MAX_DISTANCE_THRESHOLD", 0.05)
     )
 
     def _get_selected_concepts(self) -> list[str]:
@@ -103,6 +120,41 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
                 result.append(object_info)
         return result
 
+    def classify_location(self, location: ObjectDetectionInfo):
+        center_x = (location['left'] + location['right']) / 2
+        center_y = (location['top'] + location['bottom']) / 2
+
+        width = location['right'] - location['left']
+        height = location['bottom'] - location['top']
+
+        if center_x < 0.5:
+            position = "left"
+        else:
+            position = "right"
+
+        if width * height > self.max_distance_threshold:
+            distance = "near"
+        elif width * height > 0.08:
+            distance = "very near"
+        elif width * height < 0.02:
+            distance = "very far"
+        else:
+            distance = "far"
+        return position, distance
+
+    def interpret(self, output: list[ObjectDetectionInfo]) -> list[ObjectDetectionInfo]:
+        result: list[ObjectDetectionInfo] = [
+            n for n in output[0] if n['name'].lower() in DEFAULT_OBSTACLES]
+        final = []
+        for x in result:
+            horizontal_position, size = self.classify_location(
+                x.pop('location'))
+            x['position'] = horizontal_position
+            x['distance'] = size
+            x['name'] = x['name'].lower()
+            final.append(x)
+        return result
+
 
 @dataclass
 class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
@@ -115,15 +167,17 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
         )
     )
     model_version_id: Optional[str] = field(
-        default_factory=lambda: getenv("CLARIFAI_RECOGNITION_MODEL_VERSION_ID", None)
+        default_factory=lambda: getenv(
+            "CLARIFAI_RECOGNITION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_RECOGNITION_APP_ID", "main")
     )
     user_id: str = field(
-        default_factory=lambda: getenv("CLARIFAI_RECOGNITION_USER_ID", "clarifai")
+        default_factory=lambda: getenv(
+            "CLARIFAI_RECOGNITION_USER_ID", "clarifai")
     )
-    model_name="image recognition"
+    model_name = "image recognition"
 
     # PREDICTION PARAMS
     selected_concept_names: list[str] = field(
@@ -137,10 +191,12 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
         )
     )
     max_concepts: Optional[int] = field(
-        default_factory=lambda: getintenv("CLARIFAI_RECOGNITION_MAX_CONCEPTS", None)
+        default_factory=lambda: getintenv(
+            "CLARIFAI_RECOGNITION_MAX_CONCEPTS", None)
     )
     minimum_value: Optional[float] = field(
-        default_factory=lambda: getfloatenv("CLARIFAI_RECOGNITION_MINIMUM_VALUE", None)
+        default_factory=lambda: getfloatenv(
+            "CLARIFAI_RECOGNITION_MINIMUM_VALUE", None)
     )
 
     def _get_selected_concepts(self) -> list[str]:
