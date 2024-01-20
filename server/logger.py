@@ -1,6 +1,7 @@
 import logging
 import functools
 from rich.logging import RichHandler
+import logging.handlers
 
 from server.utils import getlistenv, getenv, getboolenv
 from server.settings import SERVER_ID as server
@@ -22,6 +23,20 @@ date_fmt = getenv("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S %z")
 log_file = getenv("LOG_FILE", "ilens_server.log")
 log_level = getenv("LOG_LEVEL", "DEBUG")
 log_to_file = getboolenv("LOG_TO_FILE", True)
+
+
+syslog_formatter = logging.Formatter(
+    (
+        "Python: {"
+        ' "loggerName":"%(name)s", "timestamp":"%(asctime)s",'
+        ' "pathName":"%(pathname)s", "logRecordCreationTime":"%(created)f",'
+        ' "functionName":"%(funcName)s", "levelNo":"%(levelno)s",'
+        ' "lineNo":"%(lineno)d", "time":"%(msecs)d",'
+        ' "levelName":"%(levelname)s", "message":"%(message)s"}'
+    )
+)
+syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
+syslog_handler.setFormatter(syslog_formatter)
 
 formatter = logging.Formatter(log_fmt, date_fmt)
 stream_handler = RichHandler(
@@ -54,6 +69,7 @@ class CustomLogger:
         self.logger.propagate = False
         # Add the stream handler to the logger
         self.logger.addHandler(stream_handler)
+        self.logger.addHandler(syslog_handler)
 
         if file_logging:
             # Create a file handler
