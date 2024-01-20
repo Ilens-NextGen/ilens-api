@@ -41,3 +41,7 @@ format:           ## Run pep8, black, mypy formatters.
 .PHONY: requirements
 requirements:     ## Generate requirements.txt.
 	@poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev
+
+.PHONY: live_logs
+live_logs:        ## Show live logs.
+	@pyinfra server_files/hosts.py exec -- tail -f '~/projects/ilens-api/ilens_server.log'
