@@ -64,9 +64,10 @@ async def detect(sid, clip: bytes):
                 {"image": Image(base64=image_bytes)},
             )
         )
+        # remove the operation below ?
         result = (await asyncio.to_thread(
                 timed("Interpreting results")(image_detection.interpret), 
-                detection
+                detection[0]
             )
         )
         await sio.emit(

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from clarifai_grpc.grpc.api.resources_pb2 import Input  # type: ignore[import]
 from clarifai_grpc.grpc.api.service_pb2 import PostWorkflowResultsRequest  # type: ignore[import]
-from server.clarifai.base import BaseWorkflow, Image, Text, clarifai_logger
+from server.clarifai.base import BaseWorkflow, Image, Text
 from typing import Any, TypedDict
 from io import BytesIO
 from server.utils import getenv

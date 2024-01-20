@@ -81,7 +81,7 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         default_factory=lambda: getfloatenv(
             "CLARIFAI_DETECTION_MINIMUM_VALUE", None)
     )
-    max_distance_threshold: Optional[float] = field(
+    max_distance_threshold: float = field(
         default_factory=lambda: getfloatenv(
             "CLARIFAI_DETECTION_MAX_DISTANCE_THRESHOLD", 0.05)
     )
@@ -120,8 +120,9 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
                 result.append(object_info)
         return result
 
-    def classify_location(self, location: ObjectDetectionInfo):
+    def classify_location(self, location: LocationInfo):
         center_x = (location['left'] + location['right']) / 2
+        # remove the line below ?
         center_y = (location['top'] + location['bottom']) / 2
 
         width = location['right'] - location['left']
@@ -143,15 +144,19 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         return position, distance
 
     def interpret(self, output: list[ObjectDetectionInfo]) -> list[ObjectDetectionInfo]:
-        result: list[ObjectDetectionInfo] = [
-            n for n in output[0] if n['name'].lower() in DEFAULT_OBSTACLES]
+        # FIXME: The maximim number of concepts that can be identified is 20
+        # this means one of our concepts might not be among the selected 20
+        # concepts. Can we filter in the request?
+        # check the selected_concepts attribute
+        result = [
+            n for n in output if n['name'].lower() in DEFAULT_OBSTACLES]
         final = []
         for x in result:
-            horizontal_position, size = self.classify_location(
-                x.pop('location'))
-            x['position'] = horizontal_position
-            x['distance'] = size
-            x['name'] = x['name'].lower()
+            r = {}
+            horizontal_position, size = self.classify_location(x['location'])
+            r['position'] = horizontal_position
+            r['distance'] = size
+            r['name'] = x['name'].lower()
             final.append(x)
         return result
 
