@@ -25,18 +25,18 @@ log_level = getenv("LOG_LEVEL", "DEBUG")
 log_to_file = getboolenv("LOG_TO_FILE", True)
 
 
-syslog_formatter = logging.Formatter(
-    (
-        "Python: {"
-        ' "loggerName":"%(name)s", "timestamp":"%(asctime)s",'
-        ' "pathName":"%(pathname)s", "logRecordCreationTime":"%(created)f",'
-        ' "functionName":"%(funcName)s", "levelNo":"%(levelno)s",'
-        ' "lineNo":"%(lineno)d", "time":"%(msecs)d",'
-        ' "levelName":"%(levelname)s", "message":"%(message)s"}'
-    )
-)
-syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
-syslog_handler.setFormatter(syslog_formatter)
+# syslog_formatter = logging.Formatter(
+#     (
+#         "python3.10: {"
+#         ' "loggerName":"%(name)s", "timestamp":"%(asctime)s",'
+#         ' "pathName":"%(pathname)s", "logRecordCreationTime":"%(created)f",'
+#         ' "functionName":"%(funcName)s", "levelNo":"%(levelno)s",'
+#         ' "lineNo":"%(lineno)d", "time":"%(msecs)d",'
+#         ' "levelName":"%(levelname)s", "message":"%(message)s"}'
+#     )
+# )
+# syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
+# syslog_handler.setFormatter(syslog_formatter)
 
 formatter = logging.Formatter(log_fmt, date_fmt)
 stream_handler = RichHandler(
@@ -69,7 +69,7 @@ class CustomLogger:
         self.logger.propagate = False
         # Add the stream handler to the logger
         self.logger.addHandler(stream_handler)
-        self.logger.addHandler(syslog_handler)
+        # self.logger.addHandler(syslog_handler)
 
         if file_logging:
             # Create a file handler
