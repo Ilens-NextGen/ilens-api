@@ -2,13 +2,12 @@ import logging
 import functools
 from rich.logging import RichHandler
 
-from server.utils import getlistenv, loadenv, getenv, getboolenv
-
-loadenv()
+from server.utils import getlistenv, getenv, getboolenv
+from server.settings import SERVER_ID as server
 
 debug = getboolenv("DEBUG", False)
 log_fmt = getenv(
-    "LOG_FORMAT", "[%(asctime)s] [%(process)d] [%(levelname)s] [%(name)s] %(message)s"
+    "LOG_FORMAT", f"[%(asctime)s] [{server}] [%(levelname)s] [%(name)s] %(message)s"
 )
 log_keywords = getlistenv("LOG_KEYWORDS", []) + [
     "INFO",
@@ -16,6 +15,7 @@ log_keywords = getlistenv("LOG_KEYWORDS", []) + [
     "WARNING",
     "ERROR",
     "CRITICAL",
+    server,
 ]
 
 date_fmt = getenv("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S %z")
