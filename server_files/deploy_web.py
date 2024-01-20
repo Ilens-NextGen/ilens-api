@@ -5,10 +5,12 @@ from pyinfra.api import deploy
 from pyinfra.facts.server import Which
 from pyinfra import host
 
+
 PROJECT_REPO = "https://github.com/Ilens-NextGen/ilens-api.git"
 PROJECT_SRC = "/home/ubuntu/projects/ilens-api"
 PROJECT_BRANCH = "main"
 SERVICE_FILE = "/etc/systemd/system/ilens.service"
+LOGGLY_TOKEN = "8e34c5d3-1db4-4af8-9975-0aaa2067f207"
 
 
 def ensure_local():
@@ -41,6 +43,10 @@ def _getenvvars() -> dict[str, str]:
 def setup_server():
     sudo = bool(host.get_fact(Which, "sudo"))
     has_pip = bool(host.get_fact(Which, "pip3"))
+    has_python = bool(host.get_fact(Which, "python3.10"))
+
+    if has_python:
+        return
     apt.update(
         name="Update apt cache",
         cache_time=3600,
@@ -61,27 +67,77 @@ def setup_server():
         packages=["python3.10", "python3.10-distutils"],
         _sudo=sudo,
     )
-    if not has_pip:
-        files.download(
-            name="Download get-pip.py",
-            src="https://bootstrap.pypa.io/get-pip.py",
-            dest="get-pip.py",
-            _sudo=sudo,
-        )
-        server.shell(
-            name="Install pip3.10",
-            commands=[
-                "python3.10 get-pip.py",
-            ],
-            _sudo=sudo,
-        )
-        files.link(
-            name="Link pip3.10 to pip3",
-            path="/usr/bin/pip3",
-            target="/usr/local/bin/pip3.10",
-            force=True,
-            _sudo=sudo,
-        )
+    if has_pip:
+        return
+    files.download(
+        name="Download get-pip.py",
+        src="https://bootstrap.pypa.io/get-pip.py",
+        dest="get-pip.py",
+        _sudo=sudo,
+    )
+    server.shell(
+        name="Install pip3.10",
+        commands=[
+            "python3.10 get-pip.py",
+        ],
+        _sudo=sudo,
+    )
+    files.link(
+        name="Link pip3.10 to pip3",
+        path="/usr/bin/pip3",
+        target="/usr/local/bin/pip3.10",
+        force=True,
+        _sudo=sudo,
+    )
+
+
+@deploy("Setup Loggly")
+def setup_loggly():
+    # is sudo available?
+    sudo = bool(host.get_fact(Which, "sudo"))
+    apt.packages(
+        name="Install rsyslog",
+        packages=["rsyslog"],
+        _sudo=sudo,
+    )
+    files.template(
+        name="Create rsyslog config",
+        src="server_files/templates/22-loggly.conf.j2",
+        dest="/etc/rsyslog.d/22-loggly.conf",
+        _sudo=sudo,
+        loggly_token=LOGGLY_TOKEN,
+        loggly_tag="ilens",
+        server_id=host.data.name,
+    )
+    files.line(
+        name="Set max message size",
+        path="/etc/rsyslog.conf",
+        line="$MaxMessageSize .*",
+        replace="$MaxMessageSize 64k",
+        _sudo=sudo,
+    )
+    files.line(
+        name="Enable UDP",
+        path="/etc/rsyslog.conf",
+        line=r"#\s*\$ModLoad imudp",
+        replace="$ModLoad imudp",
+        _sudo=sudo,
+    )
+    files.line(
+        name="Enable UDP",
+        path="/etc/rsyslog.conf",
+        line=r"#\s*\$UDPServerRun 514",
+        replace="$UDPServerRun 514",
+        _sudo=sudo,
+    )
+    systemd.service(
+        name="Restart rsyslog",
+        service="rsyslog",
+        running=True,
+        restarted=True,
+        daemon_reload=True,
+        _sudo=sudo,
+    )
 
 
 @deploy("Install Project")
@@ -145,7 +201,10 @@ def install_project():
 def deploy_web():
     ensure_local()
     setup_server()
+    # disabled loggly for now
+    # setup_loggly()
     install_project()
 
 
+# setup_loggly()
 deploy_web()

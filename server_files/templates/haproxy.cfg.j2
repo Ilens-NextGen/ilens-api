@@ -1,0 +1,17 @@
+frontend main
+  mode http
+  bind :80
+  {% if ssl_pem_file %}
+  bind :443 ssl crt {{ ssl_pem_file }}
+  http-request redirect scheme https unless { ssl_fc }
+  {% endif %}
+  default_backend websocket_servers
+
+backend websocket_servers
+  option http-server-close
+  timeout tunnel 1h
+  balance leastconn
+  option forwardfor
+  {% for server in servers %}
+  server {{ server.name }} {{ server.host }}:{{ server.port }} check
+  {% endfor %}
