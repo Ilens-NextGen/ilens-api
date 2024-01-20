@@ -121,6 +121,7 @@ def install_project():
         name="Create .env file",
         src=env_vars,
         dest=f"{PROJECT_SRC}/.env",
+        **_getenvvars(),
     )
     files.template(
         name="Create systemd service",
