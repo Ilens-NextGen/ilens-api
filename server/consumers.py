@@ -8,6 +8,7 @@ from server.clarifai import Image, ClarifaiImageRecognition, ClarifaiImageDetect
 from server.socket import server as sio
 from server.utils import timed
 from server.logger import CustomLogger
+from server.settings import SERVER_ID
 
 image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
@@ -20,6 +21,7 @@ websocket_logger = CustomLogger("Websocket").get_logger()
 @sio.event
 async def connect(sid, environ):
     websocket_logger.info(f"Connected {sid}")
+    await sio.emit("server-id", SERVER_ID, to=sid)
 
 
 @sio.event
@@ -134,7 +136,7 @@ async def detect(sid, clip: bytes):
 #     )
 
 
-@sio.event
+@sio.on("query")
 @timed.async_("Handle Query")
 async def dummy_query(
     sid,
