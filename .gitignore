@@ -16,3 +16,6 @@ socky
 *.png
 *.log
 *.log.backup
+test*.jpg
+test*.jpeg
+test*.png
