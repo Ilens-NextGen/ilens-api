@@ -1,6 +1,9 @@
 .ONESHELL:
 ENV_PREFIX=.venv/bin
 FILES="."
+NUM_LINES=1
+HOSTS=web_apps
+
 
 .PHONY: help
 help:             ## Show the help.
@@ -44,12 +47,12 @@ requirements:     ## Generate requirements.txt.
 
 .PHONY: live_logs
 live_logs:        ## Show live logs.
-	@pyinfra --quiet server_files/hosts.py exec -- tail -fn 1 '~/projects/ilens-api/ilens_server.log'
+	@pyinfra --quiet server_files/hosts.py exec -- tail -fn $(NUM_LINES) '~/projects/ilens-api/ilens_server.log' --limit $(HOSTS)
 
 .PHONY: deploy
 deploy:           ## Deploy the project.
-	@pyinfra --quiet server_files/hosts.py server_files/deploy_web.py
+	@pyinfra --quiet server_files/hosts.py server_files/deploy_web.py --limit $(HOSTS)
 
 .PHONY: health_check
 health_check:           ## Check the health of the project.
-	@pyinfra --quiet server_files/hosts.py server_files/health_check.py
+	@pyinfra --quiet server_files/hosts.py server_files/health_check.py --limit $(HOSTS)
