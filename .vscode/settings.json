@@ -13,7 +13,6 @@
             "source.organizeImports": "explicit",
             "source.fixAll.ruff": "explicit"
         },
-        "editor.defaultFormatter": "geecode.geecode-python",
     },
     "ruff.importStrategy": "fromEnvironment",
     "ruff.organizeImports": false,
@@ -25,5 +24,5 @@
     "python.analysis.inlayHints.variableTypes": false,
     "python.analysis.inlayHints.pytestParameters": true,
     "editor.fontLigatures": true,
-    "python.pythonPath": ".venv/bin/python3.10"
+    "python.pythonPath": "/home/codespace/.python/current/bin/python"
 }

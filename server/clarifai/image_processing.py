@@ -1,16 +1,20 @@
 from dataclasses import dataclass, field
 from typing import Any, Optional, TypedDict
-
+from itertools import groupby
 from server.clarifai.base import BaseModel, Concept, Image
 from server.utils import getenv, getfloatenv, getintenv, getlistenv
 
-DEFAULT_OBSTACLES = [
-    "man", "woman", "boy", "girl", "car", "bus",
-    "lorry", "truck", "tree", "table", "chair",
-    "door", "bicycle", "motorcycle", "bike",
-    "traffic light", "traffic sign", "stop sign",
-    "parking meter", "bench", "wall", "wardrobe", "bed"
-]
+DEFAULT_OBSTACLES = {
+    "Ambulance", "Barrel", "Bathroom cabinet", "Bed", "Bench", "Bicycle",
+    "Bookcase", "Boy", "Building", "Bus", "Cabinetry", "Car", "Cart", "Chair", "Christmas tree",
+    "Closet", "Coffee table", "Convenience store", "Couch", "Countertop", "Dishwasher", "Dog", "Door",
+    "Drawer", "Filing cabinet", "Fire hydrant", "Fountain", "Infant bed", "Kitchen & dining room table",
+    "Ladder", "Land vehicle", "Luggage and bags", "Man", "Motorcycle", "Office building", "Palm tree",
+    "Parking meter", "Piano", "Plant", "Porch", "Refrigerator", "Sculpture", "Shelf", "Sofa bed",
+    "Sports equipment", "Stationary bicycle", "Stop sign", "Street light", "Tank", "Taxi", "Tableware",
+    "Table", "Television", "Tent", "Traffic light", "Traffic sign", "Train", "Training bench",
+    "Tree", "Truck", "Van", "Vehicle", "Wardrobe", "Washing machine", "Waste container", "Wheelchair"
+}
 
 
 class LocationInfo(TypedDict):
@@ -65,7 +69,7 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
     # PREDICTION PARAMS
     selected_concept_names: list[str] = field(
         default_factory=lambda: getlistenv(
-            "CLARIFAI_DETECTION_SELECTED_CONCEPT_NAMES", []
+            "CLARIFAI_DETECTION_SELECTED_CONCEPT_NAMES", DEFAULT_OBSTACLES
         )
     )
     selected_concept_ids: list[str] = field(
@@ -133,32 +137,45 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         else:
             position = "right"
 
-        if width * height > self.max_distance_threshold:
-            distance = "near"
-        elif width * height > 0.08:
+        if width * height > 0.5:
             distance = "very near"
+        elif width * height > self.max_distance_threshold:
+            distance = "near"
         elif width * height < 0.02:
             distance = "very far"
         else:
             distance = "far"
-        return position, distance
+        return position, distance, width * height
 
     def interpret(self, output: list[ObjectDetectionInfo]) -> list[ObjectDetectionInfo]:
         # FIXME: The maximim number of concepts that can be identified is 20
         # this means one of our concepts might not be among the selected 20
         # concepts. Can we filter in the request?
         # check the selected_concepts attribute
-        result = [
-            n for n in output if n['name'].lower() in DEFAULT_OBSTACLES]
-        final = []
-        for x in result:
-            r = {}
-            horizontal_position, size = self.classify_location(x['location'])
-            r['position'] = horizontal_position
-            r['distance'] = size
-            r['name'] = x['name'].lower()
-            final.append(x)
-        return result
+        # Use a list comprehension to build the final list
+
+        return [
+            {
+                'position': self.classify_location(x['location'])[0],
+                'distance': self.classify_location(x['location'])[1],
+                'depth': self.classify_location(x['location'])[2],
+                'name': x['name'].lower(),
+                'value': x['value']
+            }
+            for x in output[0] if "near" in self.classify_location(x['location'])[1]
+        ]
+
+    def construct_warning(self, output: list) -> list[str]:
+        output.sort(key=lambda x: x['position'])
+        groups = groupby(output, lambda x: x['position'])
+        sentences = []
+        for position, group in groups:
+            group = list(group)
+            sentence = f"In front on your {position} there {'are' if len(group) > 1 else 'is a'}: "
+            for value in group:
+                sentence += f"{value['name']} {value['distance']}, "
+            sentences.append(sentence[:-2])
+        return " and ".join(sentences)
 
 
 @dataclass

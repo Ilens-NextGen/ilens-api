@@ -3,15 +3,22 @@ import io
 from pathlib import Path
 from typing import Any, Generic, Optional, Protocol, Type, TypeAlias, TypeVar, Union
 from server.utils import getenv, loadenv
-import clarifai_grpc.grpc.api.resources_pb2 as resources_pb2  # type: ignore[import]
-import clarifai_grpc.grpc.api.service_pb2 as service_pb2  # type: ignore[import]
-import clarifai_grpc.grpc.api.service_pb2_grpc as service_pb2_grpc  # type: ignore[import]
-from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel  # type: ignore[import]
+# type: ignore[import]
+import clarifai_grpc.grpc.api.resources_pb2 as resources_pb2
+# type: ignore[import]
+import clarifai_grpc.grpc.api.service_pb2 as service_pb2
+# type: ignore[import]
+import clarifai_grpc.grpc.api.service_pb2_grpc as service_pb2_grpc
+# type: ignore[import]
+from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from grpc import Channel  # type: ignore[import]
-from google.protobuf.internal.containers import RepeatedCompositeFieldContainer  # type: ignore[import]
+# type: ignore[import]
+from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from google.protobuf.struct_pb2 import Struct  # type: ignore[import]
-from clarifai_grpc.grpc.api.status import status_code_pb2  # type: ignore[import]
-from clarifai_grpc.grpc.api.status.status_pb2 import Status  # type: ignore[import]
+# type: ignore[import]
+from clarifai_grpc.grpc.api.status import status_code_pb2
+# type: ignore[import]
+from clarifai_grpc.grpc.api.status.status_pb2 import Status
 from server.logger import CustomLogger
 from functools import wraps
 
@@ -77,7 +84,8 @@ def logger(model_name="", model_id=""):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            clarifai_logger.info(f"Running {model_name} model with id {model_id}")
+            clarifai_logger.info(
+                f"Running {model_name} model with id {model_id}")
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
@@ -359,7 +367,6 @@ class BaseWorkflow(Generic[MediaType, ResponseType]):
             request = self._create_workflow_request(inputs)
             response = self._execute_request(request)
             if response.status.code != status_code_pb2.SUCCESS:
-                print(response)
                 self.handle_error(response.status)
                 return []
             else:

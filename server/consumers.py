@@ -65,14 +65,11 @@ async def detect(sid, clip: bytes):
             )
         )
         # remove the operation below ?
-        result = (await asyncio.to_thread(
-                timed("Interpreting results")(image_detection.interpret), 
-                detection[0]
-            )
-        )
+        result = await asyncio.to_thread(image_detection.interpret, detection)
+        sentence = await asyncio_thread(image_detection.construct_warning, result)
         await sio.emit(
             "detection",
-            detection,
+            sentence,
             to=sid,
         )
     except Exception as e:
