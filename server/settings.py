@@ -15,18 +15,19 @@ SERVER_ID = getenv("SERVER_ID", gethostname())
 SOCKET_MONITORING = getboolenv("SOCKET_MONITORING", False)
 
 # the allowed hosts for the server
-ALLOWED_HOSTS = getlistenv("ALLOWED_HOSTS", [])
+# ALLOWED_HOSTS = getlistenv("ALLOWED_HOSTS", [])
+ALLOWED_HOSTS = "*"
 
 
-if DEBUG:
-    # allow local connections in debug mode
-    ALLOWED_HOSTS.extend(
-        ["http://localhost", "http://127.0.0.1", "http://0.0.0.0"],
-    )
+# if DEBUG:
+#    # allow local connections in debug mode
+#    ALLOWED_HOSTS.extend(
+#        ["http://localhost", "http://127.0.0.1", "http://0.0.0.0"],
+#    )
 
-if SOCKET_MONITORING:
-    # allow the monitoring client to connect
-    ALLOWED_HOSTS.append("https://admin.socket.io")
+# if SOCKET_MONITORING:
+#    # allow the monitoring client to connect
+#    ALLOWED_HOSTS.append("https://admin.socket.io")
 
 SOCKET_ADMIN_USERNAME = getenv("SOCKET_ADMIN_USERNAME", None)
 SOCKET_ADMIN_PASSWORD = getenv("SOCKET_ADMIN_PASSWORD", None)
