@@ -33,7 +33,7 @@ def get_baseurl(environ: dict):
 async def upload_file(content: bytes, filename: str, base_url: str):
     id = uuid4().hex[:8]
     location = BASE_DIR / "uploads" / f"{id}_{filename}"
-    print(f"Uploading file to {location}")
+    websocket_logger.info(f"Uploading file to {location}")
     aiofiles.os.makedirs(location.parent, exist_ok=True)
     async with aiofiles.open(location, "wb") as f:
         await f.write(content)
@@ -44,7 +44,7 @@ async def upload_file(content: bytes, filename: str, base_url: str):
 @sio.event
 async def connect(sid, environ):
     websocket_logger.info(f"Connected {sid}")
-    print("Connected", sio.environ)
+    websocket_logger.info("Connected", sio.environ)
     await sio.emit("server-id", SERVER_ID, to=sid)
 
 
@@ -171,23 +171,23 @@ async def dummy_query(
     websocket_logger.info(
         f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB"
     )
-    print(f"output_type: {output_type}")
+    websocket_logger.info(f"output_type: {output_type}")
     if output_type == "audio":
-        print("Sending audio")
+        websocket_logger.info("Sending audio")
         await sio.emit("audio", audio, to=sid)
     elif output_type == "chunk":
-        print("Sending audio in chunks")
+        websocket_logger.info("Sending audio in chunks")
         for i in range(0, len(audio), 1024):
             await sio.emit("audio-chunk", audio[i : i + 1024], to=sid)
         await asyncio.sleep(0.1)
-        print("Sending empty chunk")
+        websocket_logger.info("Sending empty chunk")
         await sio.emit("audio-chunk", b"", to=sid)
     elif output_type == "url":
-        print("Sending audio url")
+        websocket_logger.info("Sending audio url")
         url = await upload_file(audio, "query.wav", sio.environ["HTTP_ORIGIN"])
         await sio.emit("audio-url", url, to=sid)
     elif output_type == "text":
-        print("Sending text")
+        websocket_logger.info("Sending text")
         transcript = (
             await asyncio.to_thread(
                 transcriber.run,
