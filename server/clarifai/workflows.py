@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
-from clarifai_grpc.grpc.api.resources_pb2 import Input  # type: ignore[import]
-from clarifai_grpc.grpc.api.service_pb2 import PostWorkflowResultsRequest  # type: ignore[import]
+from clarifai_grpc.grpc.api.resources_pb2 import Input
+from clarifai_grpc.grpc.api.service_pb2 import PostWorkflowResultsRequest
 from server.clarifai.base import BaseWorkflow, Image, Text
 from typing import Any, TypedDict
 from io import BytesIO

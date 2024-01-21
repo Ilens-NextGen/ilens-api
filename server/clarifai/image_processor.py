@@ -12,6 +12,7 @@ from server.logger import CustomLogger
 
 video_processor_logger = CustomLogger("VideoProcessor").get_logger()
 
+
 class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
@@ -63,5 +64,3 @@ class AsyncVideoProcessor:
         # final_size = len(image_bytes) / 1024
         # print(f"Image size reduced from {initial_size}KB to {final_size}KB")
         return image_bytes
-    
-    

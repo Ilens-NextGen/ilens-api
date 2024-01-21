@@ -3,21 +3,15 @@ import io
 from pathlib import Path
 from typing import Any, Generic, Optional, Protocol, Type, TypeAlias, TypeVar, Union
 from server.utils import getenv, loadenv
-# type: ignore[import]
 import clarifai_grpc.grpc.api.resources_pb2 as resources_pb2
-# type: ignore[import]
 import clarifai_grpc.grpc.api.service_pb2 as service_pb2
-# type: ignore[import]
 import clarifai_grpc.grpc.api.service_pb2_grpc as service_pb2_grpc
-# type: ignore[import]
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-from grpc import Channel  # type: ignore[import]
-# type: ignore[import]
+from grpc import Channel
+
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
-from google.protobuf.struct_pb2 import Struct  # type: ignore[import]
-# type: ignore[import]
+from google.protobuf.struct_pb2 import Struct
 from clarifai_grpc.grpc.api.status import status_code_pb2
-# type: ignore[import]
 from clarifai_grpc.grpc.api.status.status_pb2 import Status
 from server.logger import CustomLogger
 from functools import wraps
@@ -25,6 +19,7 @@ from functools import wraps
 Image: TypeAlias = resources_pb2.Image
 Video: TypeAlias = resources_pb2.Video
 Audio: TypeAlias = resources_pb2.Audio
+
 Text: TypeAlias = resources_pb2.Text
 Concept: TypeAlias = resources_pb2.Concept
 clarifai_logger = CustomLogger("Clarifai").get_logger()
@@ -84,8 +79,7 @@ def logger(model_name="", model_id=""):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            clarifai_logger.info(
-                f"Running {model_name} model with id {model_id}")
+            clarifai_logger.info(f"Running {model_name} model with id {model_id}")
             try:
                 result = func(*args, **kwargs)
             except Exception as e:

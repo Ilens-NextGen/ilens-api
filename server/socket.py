@@ -1,4 +1,4 @@
-from socketio.async_server import AsyncServer  # type: ignore[import]
+from socketio.async_server import AsyncServer
 from server import settings
 import socket
 

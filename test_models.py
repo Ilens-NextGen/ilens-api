@@ -1,14 +1,11 @@
 from pathlib import Path
 from server.clarifai import (
     ClarifaiTextToSpeech,
-    Text,
-    Audio,
     Image,
     ClarifaiGPT4,
     ClarifaiTranscription,
     ClarifaiImageDetection,
 )
-from server.clarifai.image_processing import ObjectDetectionInfo
 import logging
 
 
@@ -46,12 +43,27 @@ logging.info("Models loaded.")
 # ]["text"]
 # logging.info("Transcript generated: %s", story_transcript)
 
-obstacles = ["man", "woman", "boy", "girl", "car", "bus",
-             "lorry", "truck", "tree", "window", "wheel", "table", "chair"
-             "door", "bicycle", "motorcycle", "bike"
-             "traffic light", "traffic sign", "stop sign", "parking meter", "bench",
-             ]
-values = detect.run({"image": Image(base64=Path("test2.jpeg").read_bytes())})
-x = detect.interpret(values)
-print(x)
+obstacles = [
+    "man",
+    "woman",
+    "boy",
+    "girl",
+    "car",
+    "bus",
+    "lorry",
+    "truck",
+    "tree",
+    "window",
+    "wheel",
+    "table",
+    "chair" "door",
+    "bicycle",
+    "motorcycle",
+    "bike" "traffic light",
+    "traffic sign",
+    "stop sign",
+    "parking meter",
+    "bench",
+]
+x = detect.run({"image": Image(base64=Path("test2.jpeg").read_bytes())})[0]
 print(detect.construct_warning(x))

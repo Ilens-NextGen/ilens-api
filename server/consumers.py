@@ -1,6 +1,7 @@
 import asyncio
-from server.clarifai import ClarifaiTranscription, Audio
-from server.clarifai import Text
+from typing import Literal
+from server.clarifai import ClarifaiTranscription
+from server.clarifai.base import Audio
 from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
 from server.clarifai.image_processor import AsyncVideoProcessor
 from server.clarifai import Image, ClarifaiImageRecognition, ClarifaiImageDetection
@@ -58,15 +59,13 @@ async def detect(sid, clip: bytes):
             image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
-        detection = (
-            await asyncio.to_thread(
-                timed("Image Recognition")(image_detection.run),
-                {"image": Image(base64=image_bytes)},
-            )
+        detection = await asyncio.to_thread(
+            timed("Image Recognition")(image_detection.run),
+            {"image": Image(base64=image_bytes)},
         )
-        # remove the operation below ?
-        result = await asyncio.to_thread(image_detection.interpret, detection)
-        sentence = await asyncio_thread(image_detection.construct_warning, result)
+        sentence = await asyncio.to_thread(
+            image_detection.construct_warning, detection[0]
+        )
         await sio.emit(
             "detection",
             sentence,
@@ -78,25 +77,80 @@ async def detect(sid, clip: bytes):
     websocket_logger.info("Clip successfully processed")
 
 
+# @sio.event
+# @timed.async_("Handle Query")
+# async def query(sid, audio: bytes, clip: bytes):
+#     websocket_logger.info(
+#         f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB"
+#     )
+
+#     @timed.async_("Image Selection For Query")
+#     async def get_image():
+#         best_frame = await image_processor.process_video(clip)
+#         image_bytes = await asyncio.to_thread(
+#             image_processor.convert_result_image_to_bytes, best_frame
+#         )
+#         return image_bytes
+
+#     @timed.async_("Transcription")
+#     async def get_transcript():
+#         transcript = (
+#             await asyncio.to_thread(
+#                 transcriber.run,
+#                 {
+#                     "audio": Audio(base64=audio),
+#                 },
+#             )
+#         )[0]["text"]
+#         return transcript
+
+#     try:
+#         image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
+#         if not transcript:
+#             websocket_logger.info("No transcript found")
+#             return await sio.emit("no-audio", to=sid)
+#         if len(transcript) > 500:
+#             websocket_logger.info("Transcript too long")
+#             return await sio.emit("long-audio", to=sid)
+#         elif len(transcript) < 10:
+#             websocket_logger.info("Transcript too short")
+#             return await sio.emit("short-audio", to=sid)
+#         audio_stream = (
+#             await asyncio.to_thread(
+#                 timed("MultiModal To Speech")(llm_workflow.run),
+#                 {
+#                     "text": Text(raw=transcript),
+#                     "image": Image(base64=image_bytes),
+#                 },
+#             )
+#         )[0]["audio"]
+#         audio_bytes = audio_stream.getvalue()
+#     except Exception as e:
+#         websocket_logger.error("WebsocketError", exc_info=True)
+#         raise e
+#     await sio.emit("audio", audio_bytes, to=sid)
+#     websocket_logger.info(
+#         f"Query successfully processed. Got {len(audio_bytes) / 1024}KB audio"
+#     )
+
+
 @sio.event
-# @profile  # noqa: F821 # type: ignore
 @timed.async_("Handle Query")
-async def query(sid, audio: bytes, clip: bytes):
+async def dummy_query(
+    sid,
+    audio: bytes,
+    clip: bytes,
+    output_type: Literal["audio", "chunk", "text"] = "audio",
+):
     websocket_logger.info(
         f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB"
     )
-
-    @timed.async_("Image Selection For Query")
-    async def get_image():
-        best_frame = await image_processor.process_video(clip)
-        image_bytes = await asyncio.to_thread(
-            image_processor.convert_result_image_to_bytes, best_frame
-        )
-        return image_bytes
-
-    # @profile  # noqa: F821 # type: ignore
-    @timed.async_("Transcription")
-    async def get_transcript():
+    if output_type == "audio":
+        await sio.emit("audio", audio, to=sid)
+    elif output_type == "chunk":
+        for i in range(0, len(audio), 1024):
+            await sio.emit("audio-chunk", audio[i : i + 1024], to=sid)
+    elif output_type == "text":
         transcript = (
             await asyncio.to_thread(
                 transcriber.run,
@@ -105,36 +159,16 @@ async def query(sid, audio: bytes, clip: bytes):
                 },
             )
         )[0]["text"]
-        return transcript
-
-    try:
-        image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
         if not transcript:
             websocket_logger.info("No transcript found")
             return await sio.emit("no-audio", to=sid)
-        if len(transcript) > 500:
+        elif len(transcript) > 500:
             websocket_logger.info("Transcript too long")
             return await sio.emit("long-audio", to=sid)
         elif len(transcript) < 10:
             websocket_logger.info("Transcript too short")
             return await sio.emit("short-audio", to=sid)
-        audio_stream = (
-            await asyncio.to_thread(
-                timed("MultiModal To Speech")(llm_workflow.run),
-                {
-                    "text": Text(raw=transcript),
-                    "image": Image(base64=image_bytes),
-                },
-            )
-        )[0]["audio"]
-        audio_bytes = audio_stream.getvalue()
-    except Exception as e:
-        websocket_logger.error("WebsocketError", exc_info=True)
-        raise e
-    await sio.emit("audio", audio_bytes, to=sid)
-    websocket_logger.info(
-        f"Query successfully processed. Got {len(audio_bytes) / 1024}KB audio"
-    )
+        await sio.emit("text", transcript, to=sid)
 
 
 @sio.event

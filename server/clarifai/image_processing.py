@@ -4,17 +4,74 @@ from itertools import groupby
 from server.clarifai.base import BaseModel, Concept, Image
 from server.utils import getenv, getfloatenv, getintenv, getlistenv
 
-DEFAULT_OBSTACLES = {
-    "Ambulance", "Barrel", "Bathroom cabinet", "Bed", "Bench", "Bicycle",
-    "Bookcase", "Boy", "Building", "Bus", "Cabinetry", "Car", "Cart", "Chair", "Christmas tree",
-    "Closet", "Coffee table", "Convenience store", "Couch", "Countertop", "Dishwasher", "Dog", "Door",
-    "Drawer", "Filing cabinet", "Fire hydrant", "Fountain", "Infant bed", "Kitchen & dining room table",
-    "Ladder", "Land vehicle", "Luggage and bags", "Man", "Motorcycle", "Office building", "Palm tree",
-    "Parking meter", "Piano", "Plant", "Porch", "Refrigerator", "Sculpture", "Shelf", "Sofa bed",
-    "Sports equipment", "Stationary bicycle", "Stop sign", "Street light", "Tank", "Taxi", "Tableware",
-    "Table", "Television", "Tent", "Traffic light", "Traffic sign", "Train", "Training bench",
-    "Tree", "Truck", "Van", "Vehicle", "Wardrobe", "Washing machine", "Waste container", "Wheelchair"
-}
+DEFAULT_OBSTACLES = [
+    "Ambulance",
+    "Barrel",
+    "Bathroom cabinet",
+    "Bed",
+    "Bench",
+    "Bicycle",
+    "Bookcase",
+    "Boy",
+    "Building",
+    "Bus",
+    "Cabinetry",
+    "Car",
+    "Cart",
+    "Chair",
+    "Christmas tree",
+    "Closet",
+    "Coffee table",
+    "Convenience store",
+    "Couch",
+    "Countertop",
+    "Dishwasher",
+    "Dog",
+    "Door",
+    "Drawer",
+    "Filing cabinet",
+    "Fire hydrant",
+    "Fountain",
+    "Infant bed",
+    "Kitchen & dining room table",
+    "Ladder",
+    "Land vehicle",
+    "Luggage and bags",
+    "Man",
+    "Motorcycle",
+    "Office building",
+    "Palm tree",
+    "Parking meter",
+    "Piano",
+    "Plant",
+    "Porch",
+    "Refrigerator",
+    "Sculpture",
+    "Shelf",
+    "Sofa bed",
+    "Sports equipment",
+    "Stationary bicycle",
+    "Stop sign",
+    "Street light",
+    "Tank",
+    "Taxi",
+    "Tableware",
+    "Table",
+    "Television",
+    "Tent",
+    "Traffic light",
+    "Traffic sign",
+    "Train",
+    "Training bench",
+    "Tree",
+    "Truck",
+    "Van",
+    "Vehicle",
+    "Wardrobe",
+    "Washing machine",
+    "Waste container",
+    "Wheelchair",
+]
 
 
 class LocationInfo(TypedDict):
@@ -43,8 +100,18 @@ class ObjectRecognitionInfo(TypedDict):
     confidence: float
 
 
+class ObstacleInfo(TypedDict):
+    """Obstacle Info"""
+
+    name: str
+    position: str
+    distance: str
+    depth: float
+    value: float
+
+
 @dataclass
-class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
+class ClarifaiImageDetection(BaseModel[Image, list[ObstacleInfo]]):
     """Clarifai Image Detection Model"""
 
     # MODEL PARAMS
@@ -55,15 +122,13 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         )
     )
     model_version_id: Optional[str] = field(
-        default_factory=lambda: getenv(
-            "CLARIFAI_DETECTION_MODEL_VERSION_ID", None)
+        default_factory=lambda: getenv("CLARIFAI_DETECTION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_DETECTION_APP_ID", "main")
     )
     user_id: str = field(
-        default_factory=lambda: getenv(
-            "CLARIFAI_DETECTION_USER_ID", "clarifai")
+        default_factory=lambda: getenv("CLARIFAI_DETECTION_USER_ID", "clarifai")
     )
 
     # PREDICTION PARAMS
@@ -78,16 +143,15 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         )
     )
     max_concepts: Optional[int] = field(
-        default_factory=lambda: getintenv(
-            "CLARIFAI_DETECTION_MAX_CONCEPTS", None)
+        default_factory=lambda: getintenv("CLARIFAI_DETECTION_MAX_CONCEPTS", None)
     )
     minimum_value: Optional[float] = field(
-        default_factory=lambda: getfloatenv(
-            "CLARIFAI_DETECTION_MINIMUM_VALUE", None)
+        default_factory=lambda: getfloatenv("CLARIFAI_DETECTION_MINIMUM_VALUE", None)
     )
     max_distance_threshold: float = field(
         default_factory=lambda: getfloatenv(
-            "CLARIFAI_DETECTION_MAX_DISTANCE_THRESHOLD", 0.05)
+            "CLARIFAI_DETECTION_MAX_DISTANCE_THRESHOLD", 0.05
+        )
     )
 
     def _get_selected_concepts(self) -> list[str]:
@@ -104,9 +168,9 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
         """Returns the minimum probability threshold."""
         return self.minimum_value
 
-    def parse_output(self, output: Any) -> list[ObjectDetectionInfo]:
+    def parse_output(self, output: Any) -> list[ObstacleInfo]:
         regions = output.data.regions
-        result: list[ObjectDetectionInfo] = []
+        result: list[ObstacleInfo] = []
         for region in regions:
             location_info: LocationInfo = {
                 "top": round(region.region_info.bounding_box.top_row, 3),
@@ -114,23 +178,27 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
                 "bottom": round(region.region_info.bounding_box.bottom_row, 3),
                 "right": round(region.region_info.bounding_box.right_col, 3),
             }
+            position, distance, depth = self.classify_location(location_info)
+            # TODO: accept all objects
+            # only accept objects that are near
+            if "near" not in distance:
+                continue
             for concept in region.data.concepts:
-                object_info: ObjectDetectionInfo = {
-                    "id": concept.id,
+                object_info: ObstacleInfo = {
                     "name": concept.name,
                     "value": round(concept.value, 4),
-                    "location": location_info,
+                    "position": position,
+                    "distance": distance,
+                    "depth": depth,
                 }
                 result.append(object_info)
         return result
 
     def classify_location(self, location: LocationInfo):
-        center_x = (location['left'] + location['right']) / 2
-        # remove the line below ?
-        center_y = (location['top'] + location['bottom']) / 2
+        center_x = (location["left"] + location["right"]) / 2
 
-        width = location['right'] - location['left']
-        height = location['bottom'] - location['top']
+        width = location["right"] - location["left"]
+        height = location["bottom"] - location["top"]
 
         if center_x < 0.5:
             position = "left"
@@ -147,30 +215,12 @@ class ClarifaiImageDetection(BaseModel[Image, list[ObjectDetectionInfo]]):
             distance = "far"
         return position, distance, width * height
 
-    def interpret(self, output: list[ObjectDetectionInfo]) -> list[ObjectDetectionInfo]:
-        # FIXME: The maximim number of concepts that can be identified is 20
-        # this means one of our concepts might not be among the selected 20
-        # concepts. Can we filter in the request?
-        # check the selected_concepts attribute
-        # Use a list comprehension to build the final list
-
-        return [
-            {
-                'position': self.classify_location(x['location'])[0],
-                'distance': self.classify_location(x['location'])[1],
-                'depth': self.classify_location(x['location'])[2],
-                'name': x['name'].lower(),
-                'value': x['value']
-            }
-            for x in output[0] if "near" in self.classify_location(x['location'])[1]
-        ]
-
-    def construct_warning(self, output: list) -> list[str]:
-        output.sort(key=lambda x: x['position'])
-        groups = groupby(output, lambda x: x['position'])
+    def construct_warning(self, output: list[ObstacleInfo]) -> str:
+        output.sort(key=lambda x: x["position"])
+        groups = groupby(output, lambda x: x["position"])
         sentences = []
-        for position, group in groups:
-            group = list(group)
+        for position, _group in groups:
+            group = list(_group)
             sentence = f"In front on your {position} there {'are' if len(group) > 1 else 'is a'}: "
             for value in group:
                 sentence += f"{value['name']} {value['distance']}, "
@@ -189,15 +239,13 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
         )
     )
     model_version_id: Optional[str] = field(
-        default_factory=lambda: getenv(
-            "CLARIFAI_RECOGNITION_MODEL_VERSION_ID", None)
+        default_factory=lambda: getenv("CLARIFAI_RECOGNITION_MODEL_VERSION_ID", None)
     )
     app_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_RECOGNITION_APP_ID", "main")
     )
     user_id: str = field(
-        default_factory=lambda: getenv(
-            "CLARIFAI_RECOGNITION_USER_ID", "clarifai")
+        default_factory=lambda: getenv("CLARIFAI_RECOGNITION_USER_ID", "clarifai")
     )
     model_name = "image recognition"
 
@@ -213,12 +261,10 @@ class ClarifaiImageRecognition(BaseModel[Image, list[ObjectRecognitionInfo]]):
         )
     )
     max_concepts: Optional[int] = field(
-        default_factory=lambda: getintenv(
-            "CLARIFAI_RECOGNITION_MAX_CONCEPTS", None)
+        default_factory=lambda: getintenv("CLARIFAI_RECOGNITION_MAX_CONCEPTS", None)
     )
     minimum_value: Optional[float] = field(
-        default_factory=lambda: getfloatenv(
-            "CLARIFAI_RECOGNITION_MINIMUM_VALUE", None)
+        default_factory=lambda: getfloatenv("CLARIFAI_RECOGNITION_MINIMUM_VALUE", None)
     )
 
     def _get_selected_concepts(self) -> list[str]:
