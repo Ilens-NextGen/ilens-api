@@ -142,7 +142,7 @@ async def dummy_query(
     sid,
     audio: bytes,
     clip: bytes,
-    output_type: Literal["audio", "chunk", "text"] = "audio",
+    output_type: Literal["audio", "chunk", "text", "url"] = "audio",
 ):
     websocket_logger.info(
         f"Got a query sent as audio of {len(audio) / 1024}KB and a clip of {len(clip) / 1024}KB"
@@ -152,6 +152,14 @@ async def dummy_query(
     elif output_type == "chunk":
         for i in range(0, len(audio), 1024):
             await sio.emit("audio-chunk", audio[i : i + 1024], to=sid)
+        await asyncio.sleep(0.1)
+        await sio.emit("audio-chunk", b"", to=sid)
+    elif output_type == "url":
+        await sio.emit(
+            "url",
+            "https://file-examples.com/wp-content/storage/2017/11/file_example_WAV_10MG.wav",
+            to=sid,
+        )
     elif output_type == "text":
         transcript = (
             await asyncio.to_thread(
