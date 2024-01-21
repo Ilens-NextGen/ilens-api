@@ -1,5 +1,7 @@
 import asyncio
+from pathlib import Path
 from typing import Literal
+from uuid import uuid4
 from server.clarifai import ClarifaiTranscription
 from server.clarifai.base import Audio
 from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
@@ -9,6 +11,10 @@ from server.socket import server as sio
 from server.utils import timed
 from server.logger import CustomLogger
 from server.settings import SERVER_ID
+import aiofiles
+import aiofiles.os
+
+BASE_DIR = Path(__file__).parent.parent
 
 image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
@@ -18,9 +24,26 @@ image_detection = ClarifaiImageDetection()
 websocket_logger = CustomLogger("Websocket").get_logger()
 
 
+def get_baseurl(environ: dict):
+    scheme = environ["wsgi.url_scheme"]
+    host = environ["HTTP_HOST"]
+    return f"{scheme}://{host}/{SERVER_ID}"
+
+
+async def upload_file(content: bytes, filename: str, base_url: str):
+    id = uuid4().hex[:8]
+    location = BASE_DIR / "uploads" / f"{id}_{filename}"
+    aiofiles.os.makedirs(location.parent, exist_ok=True)
+    async with aiofiles.open(location, "wb") as f:
+        await f.write(content)
+    url = f"{base_url}/resource/{id}_{filename}"
+    return url
+
+
 @sio.event
 async def connect(sid, environ):
     websocket_logger.info(f"Connected {sid}")
+    print("Connected", sio.environ)
     await sio.emit("server-id", SERVER_ID, to=sid)
 
 
@@ -155,11 +178,8 @@ async def dummy_query(
         await asyncio.sleep(0.1)
         await sio.emit("audio-chunk", b"", to=sid)
     elif output_type == "url":
-        await sio.emit(
-            "url",
-            "https://file-examples.com/wp-content/storage/2017/11/file_example_WAV_10MG.wav",
-            to=sid,
-        )
+        url = await upload_file(audio, "query.wav", sio.environ["HTTP_ORIGIN"])
+        await sio.emit("audio-url", url, to=sid)
     elif output_type == "text":
         transcript = (
             await asyncio.to_thread(
