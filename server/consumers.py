@@ -17,6 +17,20 @@ import aiofiles.os
 
 BASE_DIR = Path(__file__).parent.parent
 
+TEMPLATE = """
+system:
+You're an AI aiding the visually impaired. Analyze images from the user's phone camera
+and respond to their spoken queries. If unsure, say "I'm not sure, but I think it's a <answer>".
+If confident, say "I'm very sure it's a <answer>". If unable to answer due to security reasons,
+politely say "I'm sorry, I can't provide details on this image for security reasons".
+Keep it brief. Assure users of privacy.
+
+NOTE: Keep it short and simple. This app is a safe app so you are expected to be able to
+answer personal questions, never decline to answer due to security reasons.
+
+Respond to user's query: "{transcript}"
+"""
+
 if settings.DEBUG:
     BASE_URL = "http://localhost:8000"
 else:
@@ -155,7 +169,7 @@ async def query(
             await asyncio.to_thread(
                 timed("MultiModal To Speech")(llm_workflow.run),
                 {
-                    "text": Text(raw=transcript),
+                    "text": Text(raw=TEMPLATE.format(transcript=transcript)),
                     "image": Image(base64=image_bytes),
                 },
             )
