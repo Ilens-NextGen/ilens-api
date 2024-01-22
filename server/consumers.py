@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 from typing import Literal
 from uuid import uuid4
+from server import settings
 from server.clarifai import ClarifaiTranscription
 from server.clarifai.base import Audio
 from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
@@ -16,6 +17,11 @@ import aiofiles.os
 
 BASE_DIR = Path(__file__).parent.parent
 
+if settings.DEBUG:
+    BASE_URL = "http://localhost:8000"
+else:
+    BASE_URL = f"https://ilens.allcanlearn.me/{SERVER_ID}"
+
 image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
 llm_workflow = ClarifaiMultimodalToSpeechWF()
@@ -24,17 +30,11 @@ image_detection = ClarifaiImageDetection()
 websocket_logger = CustomLogger("Websocket").get_logger()
 
 
-def get_baseurl(environ: dict):
-    scheme = environ["wsgi.url_scheme"]
-    host = environ["HTTP_HOST"]
-    return f"{scheme}://{host}/{SERVER_ID}"
-
-
 async def upload_file(content: bytes, filename: str, base_url: str):
     id = uuid4().hex[:8]
     location = BASE_DIR / "uploads" / f"{id}_{filename}"
     websocket_logger.info(f"Uploading file to {location}")
-    aiofiles.os.makedirs(location.parent, exist_ok=True)
+    await aiofiles.os.makedirs(location.parent, exist_ok=True)
     async with aiofiles.open(location, "wb") as f:
         await f.write(content)
     url = f"{base_url}/resource/{id}_{filename}"
@@ -184,7 +184,7 @@ async def dummy_query(
         await sio.emit("audio-chunk", b"", to=sid)
     elif output_type == "url":
         websocket_logger.info("Sending audio url")
-        url = await upload_file(audio, "query.wav", sio.environ["HTTP_ORIGIN"])
+        url = await upload_file(audio, "query.wav", BASE_URL)
         await sio.emit("audio-url", url, to=sid)
     elif output_type == "text":
         websocket_logger.info("Sending text")
