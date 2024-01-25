@@ -4,7 +4,7 @@ from math import floor
 from typing import List
 
 import cv2
-import imageio.v2 as iio
+import imageio as iio
 import numpy as np
 from PIL import Image
 
