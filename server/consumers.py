@@ -1,6 +1,6 @@
 import asyncio
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypedDict
 from uuid import uuid4
 from server import settings
 from server.clarifai import ClarifaiTranscription
@@ -12,8 +12,8 @@ from server.socket import server as sio
 from server.utils import timed
 from server.logger import CustomLogger
 from server.settings import SERVER_ID
-import aiofiles
-import aiofiles.os
+import aiofiles  # type: ignore
+import aiofiles.os  # type: ignore
 
 BASE_DIR = Path(__file__).parent.parent
 
@@ -44,6 +44,11 @@ image_detection = ClarifaiImageDetection()
 websocket_logger = CustomLogger("Websocket").get_logger()
 
 
+class resource(TypedDict):
+    raw: bytes
+    mimetype: str
+
+
 async def upload_file(content: bytes, filename: str, base_url: str):
     id = uuid4().hex[:8]
     location = BASE_DIR / "uploads" / f"{id}_{filename}"
@@ -64,11 +69,13 @@ async def connect(sid, environ):
 
 @sio.event
 @timed.async_("Handle Recognition")
-async def recognize(sid, clip: bytes):
+async def recognize(sid, clip: resource):
     websocket_logger.info("Clip processing began")
     try:
         async with timed("Image Selection For Recognizer"):
-            best_frame = await image_processor.process_video(clip)
+            best_frame = await image_processor.process_video(
+                clip["raw"], clip["mimetype"]
+            )
             image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
@@ -91,11 +98,13 @@ async def recognize(sid, clip: bytes):
 
 @sio.event
 @timed.async_("Handle Detection")
-async def detect(sid, clip: bytes):
+async def detect(sid, clip: resource):
     websocket_logger.info("Clip processing began")
     try:
         async with timed("Image Selection For Detector"):
-            best_frame = await image_processor.process_video(clip)
+            best_frame = await image_processor.process_video(
+                clip["raw"], clip["mimetype"]
+            )
             image_bytes = await asyncio.to_thread(
                 image_processor.convert_result_image_to_bytes, best_frame
             )
@@ -121,19 +130,26 @@ async def detect(sid, clip: bytes):
 @timed.async_("Handle Query")
 async def query(
     sid,
-    audio: bytes,
-    clip: bytes,
+    audio: resource,
+    clip: resource,
     output_type: Literal["audio", "chunk", "text", "url"] = "audio",
 ):
-    clip_size = len(clip) / 1024
-    audio_size = len(audio) / 1024
+    clip_raw = clip["raw"]
+    clip_type = clip["mimetype"]
+    clip_size = len(clip_raw) / 1024
+    audio_raw = audio["raw"]
+    audio_type = audio["mimetype"]
+    audio_size = len(audio_raw) / 1024
     websocket_logger.info(
-        f"Got a query sent as audio of {audio_size}KB and a clip of {clip_size}KB"
+        (
+            f"Got a query sent as {audio_type} audio of {audio_size}KB"
+            f" and a {clip_type} clip of {clip_size}KB"
+        )
     )
 
     @timed.async_("Image Selection For Query")
     async def get_image():
-        best_frame = await image_processor.process_video(clip)
+        best_frame = await image_processor.process_video(clip_raw, clip_type)
         image_bytes = await asyncio.to_thread(
             image_processor.convert_result_image_to_bytes, best_frame
         )
@@ -145,7 +161,7 @@ async def query(
             await asyncio.to_thread(
                 transcriber.run,
                 {
-                    "audio": Audio(base64=audio),
+                    "audio": Audio(base64=audio_raw),
                 },
             )
         )[0]["text"]
@@ -176,7 +192,7 @@ async def query(
         )[0]["audio"]
         audio_bytes = audio_stream.getvalue()
         websocket_logger.info(
-            f"Query successfully processed. Got {len(audio_bytes) / 1024}KB audio"
+            "Query successfully processed." f" Got {len(audio_bytes) / 1024}KB audio"
         )
         if output_type == "audio":
             websocket_logger.info("Sending audio")

@@ -17,10 +17,16 @@ class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
     # @profile  # noqa: F821 # type: ignore
-    async def process_video(self, video_bytes: bytes) -> np.ndarray:
+    async def process_video(self, video_bytes: bytes, extension: str) -> np.ndarray:
+        if "/" in extension:
+            extension = extension.split("/")[1]
+        if not extension.startswith("."):
+            extension = "." + extension
         video_processor_logger.info("Began processing video")
         try:
-            frames = await asyncio.to_thread(self._bytes_to_frames, video_bytes)
+            frames = await asyncio.to_thread(
+                self._bytes_to_frames, video_bytes, extension
+            )
             gray_frames = await asyncio.to_thread(self._grays_scale_image, frames)
             best_frame_index = await asyncio.to_thread(
                 self._get_sharpest_frame, gray_frames
@@ -33,9 +39,9 @@ class AsyncVideoProcessor:
             video_processor_logger.error("VideoProcessorError", exc_info=True)
             raise e
 
-    def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:
+    def _bytes_to_frames(self, video_bytes: bytes, extension: str) -> List[np.ndarray]:
         video_processor_logger.info("Converting video bytes to frames")
-        frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
+        frames = iio.imread(video_bytes, index=None, extension=extension)
         video_processor_logger.info("Finished converting video bytes to frames")
         return frames  # type: ignore
 
