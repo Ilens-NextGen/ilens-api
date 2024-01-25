@@ -16,8 +16,8 @@ FILE_NAME = "audio.wav"
 VOICE = "alloy"
 MAX_TOKENS = 100
 PROMPT = (
-    "I have a video bytes all I know is that it is from a video It can be any format. GIve me a code that can convert this video bytes to a list of frames ie a List[np.ndarray].\
-        I don't want to write it to a temp file and i want the fastest python solution to do it"
+    "I have a video bytes all I know is that it is from a video It can be any format. GIve me a the fastest python code that can convert this video bytes to a list of frames ie a List[np.ndarray].\
+I don't want to write it to a temp file, GO"
 )
 
 logging.info("Loading models...")
@@ -26,8 +26,8 @@ tts = ClarifaiTextToSpeech(voice=VOICE)
 stt = ClarifaiTranscription()
 detect = ClarifaiImageDetection()
 logging.info("Models loaded.")
-# logging.info("Generating story...")
-# story = llm.run({"text": Text(raw=PROMPT)})[0]["text"]
+logging.info("Generating story...")
+story = llm.run({"text": Text(raw=PROMPT)})[0]["text"]
 # logging.info("Story generated: %s", story)
 # logging.info("Generating audio...")
 # story_audio = tts.run({"text": Text(raw=story)})[0]["audio"]
@@ -66,6 +66,6 @@ logging.info("Models loaded.")
 #     "stop sign",
 #     "parking meter",
 #     "bench",
-# ]
-x = detect.run({"image": Image(base64=Path("test1.jpg").read_bytes())})[0]
-print(detect.construct_warning(x))
+# # ]
+# x = detect.run({"image": Image(base64=Path("test1.jpg").read_bytes())})[0]
+# print(detect.construct_warning(x))

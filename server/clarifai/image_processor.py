@@ -4,7 +4,7 @@ from math import floor
 from typing import List
 
 import cv2
-import imageio.v3 as iio
+import imageio as iio
 import numpy as np
 from PIL import Image
 
@@ -38,12 +38,23 @@ class AsyncVideoProcessor:
         # frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
         # video_processor_logger.info("Finished converting video bytes to frames")
         # return frames 
-        reader = iio.get_reader(BytesIO(video_bytes), 'ffmpeg')
-            
+        nparr = np.frombuffer(video_bytes, np.uint8)
+        video_capture = cv2.VideoCapture()
+        success = video_capture.open(BytesIO(nparr))
+        if not success:
+            raise Exception("Error opening video stream")
         frames = []
-        for frame in reader:
+        while True:
+            ret, frame = video_capture.read()
+            if not ret:
+                break
             frames.append(frame)
-        reader.close()
+        video_capture.release()
+        # reader = iio.get_reader(BytesIO(video_bytes), 'ffmpeg')
+        # frames = []
+        # for frame in reader:
+        #     frames.append(frame)
+        # reader.close()
         video_processor_logger.info("Finished converting video bytes to frames")
         return frames
 
