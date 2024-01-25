@@ -47,12 +47,20 @@ requirements:     ## Generate requirements.txt.
 
 .PHONY: live_logs
 live_logs:        ## Show live logs.
-	@pyinfra --quiet server_files/hosts.py exec -- tail -fn $(NUM_LINES) '~/projects/ilens-api/ilens_server.log' --limit $(HOSTS)
+	@pyinfra --quiet --limit $(HOSTS) server_files/hosts.py exec -- tail -fn $(NUM_LINES) '~/projects/ilens-api/ilens_server.log'
 
 .PHONY: deploy
 deploy:           ## Deploy the project.
-	@pyinfra --quiet server_files/hosts.py server_files/deploy_web.py --limit $(HOSTS)
+	@pyinfra --limit $(HOSTS) --quiet server_files/hosts.py server_files/deploy_web.py
 
 .PHONY: health_check
 health_check:           ## Check the health of the project.
-	@pyinfra --quiet server_files/hosts.py server_files/health_check.py --limit $(HOSTS)
+	@pyinfra --quiet --limit $(HOSTS) server_files/hosts.py exec -- curl -s 0:8000
+
+.PHONY: stop_server
+stop_server:           ## Stop the server.
+	@pyinfra --quiet --limit $(HOSTS) server_files/hosts.py exec -- service ilens stop
+
+.PHONY: start_server
+start_server:           ## Start the server.
+	@pyinfra --quiet --limit $(HOSTS) server_files/hosts.py exec -- service ilens start
