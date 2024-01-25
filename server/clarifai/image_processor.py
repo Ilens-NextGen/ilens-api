@@ -35,26 +35,21 @@ class AsyncVideoProcessor:
 
     def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:
         video_processor_logger.info("Converting video bytes to frames")
-        # frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
-        # video_processor_logger.info("Finished converting video bytes to frames")
-        # return frames 
+        # frames = iio.mimeread(video_bytes)
         nparr = np.frombuffer(video_bytes, np.uint8)
+
+        # Decode the video using OpenCV
         video_capture = cv2.VideoCapture()
-        success = video_capture.open(BytesIO(nparr))
-        if not success:
-            raise Exception("Error opening video stream")
+        video_capture.open(BytesIO(nparr))
+
         frames = []
         while True:
             ret, frame = video_capture.read()
             if not ret:
                 break
             frames.append(frame)
+
         video_capture.release()
-        # reader = iio.get_reader(BytesIO(video_bytes), 'ffmpeg')
-        # frames = []
-        # for frame in reader:
-        #     frames.append(frame)
-        # reader.close()
         video_processor_logger.info("Finished converting video bytes to frames")
         return frames
 
