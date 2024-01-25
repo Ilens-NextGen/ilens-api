@@ -34,21 +34,29 @@ class AsyncVideoProcessor:
             raise e
 
     def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:
+        video_processor_logger.info("Converting video bytes to frames")
         frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
+        video_processor_logger.info("Finished converting video bytes to frames")
         return frames  # type: ignore
 
     def _grays_scale_image(self, frames: List[np.ndarray]) -> List[np.ndarray]:
-        return [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames]
+        video_processor_logger.info("Converting frames to grayscale")
+        res = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames]
+        video_processor_logger.info("Finished converting frames to grayscale")
+        return res
 
     def _get_sharpest_frame(self, gray_frames: List[np.ndarray]):
+        video_processor_logger.info("Getting sharpest frame")
         sharpest_frame_index = np.argmax(
             [cv2.Laplacian(gray_frame, cv2.CV_64F).var() for gray_frame in gray_frames]
         )
+        video_processor_logger.info("Finished getting sharpest frame")
         # print(sharpest_frame_index)
         return sharpest_frame_index
 
     # @profile  # noqa: F821 # type: ignore
     def convert_result_image_to_bytes(self, image: np.ndarray) -> bytes:
+        video_processor_logger.info("Converting result image to bytes")
         image_pil: Image.Image = Image.fromarray(image)
         # initial_size = len(image_pil.tobytes()) / 1024
         x, y = image_pil.size
@@ -60,7 +68,5 @@ class AsyncVideoProcessor:
         buffer = BytesIO()
         image_pil.save(buffer, format="PNG", optimize=True, quality=75)
         image_bytes = buffer.getvalue()
-        # Path("image.png").write_bytes(image_bytes)
-        # final_size = len(image_bytes) / 1024
-        # print(f"Image size reduced from {initial_size}KB to {final_size}KB")
+        video_processor_logger.info("Finished converting result image to bytes")
         return image_bytes
