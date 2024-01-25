@@ -5,6 +5,7 @@ from server.clarifai import (
     ClarifaiGPT4,
     ClarifaiTranscription,
     ClarifaiImageDetection,
+    Text
 )
 import logging
 
@@ -15,7 +16,8 @@ FILE_NAME = "audio.wav"
 VOICE = "alloy"
 MAX_TOKENS = 100
 PROMPT = (
-    "Generate a short story about a robot. This story should not be more than 50 words."
+    "I have a video bytes all I know is that it is from a video It can be any format. GIve me a code that can convert this video bytes to a list of frames ie a List[np.ndarray].\
+        I don't want to write it to a temp file and i want the fastest python solution to do it"
 )
 
 logging.info("Loading models...")
@@ -43,27 +45,27 @@ logging.info("Models loaded.")
 # ]["text"]
 # logging.info("Transcript generated: %s", story_transcript)
 
-obstacles = [
-    "man",
-    "woman",
-    "boy",
-    "girl",
-    "car",
-    "bus",
-    "lorry",
-    "truck",
-    "tree",
-    "window",
-    "wheel",
-    "table",
-    "chair" "door",
-    "bicycle",
-    "motorcycle",
-    "bike" "traffic light",
-    "traffic sign",
-    "stop sign",
-    "parking meter",
-    "bench",
-]
-x = detect.run({"image": Image(base64=Path("test2.jpeg").read_bytes())})[0]
+# obstacles = [
+#     "man",
+#     "woman",
+#     "boy",
+#     "girl",
+#     "car",
+#     "bus",
+#     "lorry",
+#     "truck",
+#     "tree",
+#     "window",
+#     "wheel",
+#     "table",
+#     "chair" "door",
+#     "bicycle",
+#     "motorcycle",
+#     "bike" "traffic light",
+#     "traffic sign",
+#     "stop sign",
+#     "parking meter",
+#     "bench",
+# ]
+x = detect.run({"image": Image(base64=Path("test1.jpg").read_bytes())})[0]
 print(detect.construct_warning(x))

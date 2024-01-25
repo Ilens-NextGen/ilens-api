@@ -38,17 +38,12 @@ class AsyncVideoProcessor:
         # frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
         # video_processor_logger.info("Finished converting video bytes to frames")
         # return frames 
-        video_stream = BytesIO(video_bytes)
-        video_stream.seek(0)
-        file_bytes = np.asarray(bytearray(video_stream.read()), dtype=np.uint8)
-        cap = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
+        reader = iio.get_reader(BytesIO(video_bytes), 'ffmpeg')
+            
         frames = []
-        while(cap.isOpened()):
-            ret, frame = cap.read()
-            if ret == False:
-                break
+        for frame in reader:
             frames.append(frame)
-        cap.release()
+        reader.close()
         video_processor_logger.info("Finished converting video bytes to frames")
         return frames
 
