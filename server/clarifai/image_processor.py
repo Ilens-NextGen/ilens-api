@@ -35,9 +35,22 @@ class AsyncVideoProcessor:
 
     def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:
         video_processor_logger.info("Converting video bytes to frames")
-        frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
+        # frames = iio.imread(video_bytes, index=None, format_hint=".mp4")
+        # video_processor_logger.info("Finished converting video bytes to frames")
+        # return frames 
+        video_stream = io.BytesIO(video_bytes)
+        video_stream.seek(0)
+        file_bytes = np.asarray(bytearray(video_stream.read()), dtype=np.uint8)
+        cap = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
+        frames = []
+        while(cap.isOpened()):
+            ret, frame = cap.read()
+            if ret == False:
+                break
+            frames.append(frame)
+        cap.release()
         video_processor_logger.info("Finished converting video bytes to frames")
-        return frames  # type: ignore
+        return frames
 
     def _grays_scale_image(self, frames: List[np.ndarray]) -> List[np.ndarray]:
         video_processor_logger.info("Converting frames to grayscale")
