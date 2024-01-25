@@ -18,6 +18,8 @@ class AsyncVideoProcessor:
 
     # @profile  # noqa: F821 # type: ignore
     async def process_video(self, video_bytes: bytes, extension: str) -> np.ndarray:
+        if ';' in extension:
+            extension = extension.split(";")[0]
         if "/" in extension:
             extension = extension.split("/")[1]
         if not extension.startswith("."):
