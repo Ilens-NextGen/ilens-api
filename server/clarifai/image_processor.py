@@ -12,16 +12,23 @@ from server.logger import CustomLogger
 
 video_processor_logger = CustomLogger("VideoProcessor").get_logger()
 
+VIDEO_MIMETYPES = {
+    "video/ogg": "ogg",
+    "video/mp4": "mp4",
+    "video/x-matroska": "mkv",
+    "video/webm": "webm",
+}
+
 
 class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
     # @profile  # noqa: F821 # type: ignore
     async def process_video(self, video_bytes: bytes, extension: str) -> np.ndarray:
-        if ';' in extension:
+        if ";" in extension:
             extension = extension.split(";")[0]
         if "/" in extension:
-            extension = extension.split("/")[1]
+            extension = VIDEO_MIMETYPES[extension]
         if not extension.startswith("."):
             extension = "." + extension
         video_processor_logger.info("Began processing video")
