@@ -15,7 +15,6 @@ video_processor_logger = CustomLogger("VideoProcessor").get_logger()
 VIDEO_MIMETYPES = {
     "video/ogg": "ogg",
     "video/mp4": "mp4",
-    "video/x-matroska": "mkv",
     "video/webm": "webm",
 }
 
