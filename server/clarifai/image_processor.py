@@ -4,7 +4,7 @@ from math import floor
 from typing import List
 
 import cv2
-import imageio as iio
+import imageio.v2 as iio
 import numpy as np
 from PIL import Image
 
@@ -35,21 +35,7 @@ class AsyncVideoProcessor:
 
     def _bytes_to_frames(self, video_bytes: bytes) -> List[np.ndarray]:
         video_processor_logger.info("Converting video bytes to frames")
-        # frames = iio.mimeread(video_bytes)
-        nparr = np.frombuffer(video_bytes, np.uint8)
-
-        # Decode the video using OpenCV
-        video_capture = cv2.VideoCapture()
-        video_capture.open(BytesIO(nparr))
-
-        frames = []
-        while True:
-            ret, frame = video_capture.read()
-            if not ret:
-                break
-            frames.append(frame)
-
-        video_capture.release()
+        frames = iio.mimeread(video_bytes)
         video_processor_logger.info("Finished converting video bytes to frames")
         return frames
 
