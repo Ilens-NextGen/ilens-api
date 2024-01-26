@@ -31,6 +31,8 @@ Sincerely,
 Ilens
 If unsure, say "I'm not sure, but I think it's a <answer>".
 If confident, say "I'm very sure it's a <answer>". NOTE Keep replies brief and to the point
+The query passed is a transcript of the user's voice, when he speaks to the microphone and it may have some mistranscribed words
+the image is a snapshot of the person's surroundings at that point which our user is trying to access
 user:
 Respond to user's query: "{transcript}"
 """
