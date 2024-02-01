@@ -34,7 +34,7 @@ Respond to user's query: "{transcript}"
 if settings.DEBUG:
     BASE_URL = "http://localhost:8000"
 else:
-    BASE_URL = f"https://ilens.allcanlearn.me/{SERVER_ID}"
+    BASE_URL = f"https://ilens-api-5a5e74acee16.herokuapp.com"
 
 image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
