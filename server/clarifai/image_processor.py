@@ -22,6 +22,11 @@ VIDEO_MIMETYPES = {
 class AsyncVideoProcessor:
     """this class is for handling videos to select the best frame for processing"""
 
+    def bytes_to_ndarray(self, image_bytes: bytes) -> np.ndarray:
+        """Converts image bytes to numpy array."""
+        image = Image.open(BytesIO(image_bytes))
+        return np.array(image)
+
     # @profile  # noqa: F821 # type: ignore
     async def process_video(self, video_bytes: bytes, extension: str) -> np.ndarray:
         if ";" in extension:
