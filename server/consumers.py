@@ -2,9 +2,9 @@ import asyncio
 from pathlib import Path
 from typing import Literal, TypedDict
 from uuid import uuid4
-from server import settings
 from server.clarifai import ClarifaiTranscription
 from server.clarifai.base import Audio, Text
+from server.clarifai.text_generation import ClarifaiGPT4V, ClarifaiGPT4VAlternative
 from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
 from server.clarifai.image_processor import AsyncVideoProcessor
 from server.clarifai import Image, ClarifaiImageRecognition, ClarifaiImageDetection
@@ -35,17 +35,17 @@ user:
 Respond to user's query: "{transcript}"
 """
 
-if settings.DEBUG:
-    BASE_URL = "http://localhost:8000"
-else:
-    BASE_URL = f"https://ilens.allcanlearn.me/{SERVER_ID}"
-
 image_recognition = ClarifaiImageRecognition()
 transcriber = ClarifaiTranscription()
 llm_workflow = ClarifaiMultimodalToSpeechWF()
+gpt4v = ClarifaiGPT4V()
+gpt4va = ClarifaiGPT4VAlternative()
 image_processor = AsyncVideoProcessor()
 image_detection = ClarifaiImageDetection()
 websocket_logger = CustomLogger("Websocket").get_logger()
+
+# default base url, changes during runtime
+BASE_URL = "http://localhost:8000"
 
 
 class resource(TypedDict):
@@ -66,6 +66,13 @@ async def upload_file(content: bytes, filename: str, base_url: str):
 
 @sio.event
 async def connect(sid, environ):
+    """Connect event for the websocket. Sends the server id to the client."""
+    global BASE_URL
+
+    host = environ["HTTP_HOST"]
+    scheme = environ["wsgi.url_scheme"]
+    BASE_URL = f"{scheme}://{host}"
+    print(BASE_URL)
     websocket_logger.info(f"Connected {sid}")
     websocket_logger.info("Connected", sio.environ)
     await sio.emit("server-id", SERVER_ID, to=sid)
@@ -212,6 +219,74 @@ async def query(
             websocket_logger.info("Sending audio url")
             url = await upload_file(audio_bytes, "query.wav", BASE_URL)
             await sio.emit("audio-url", url, to=sid)
+    except Exception as e:
+        websocket_logger.error("WebsocketError", exc_info=True)
+        raise e
+
+
+@sio.on("query_with_images")
+@timed.async_("Handle Query")
+async def query_with_images(
+    sid,
+    audio: resource,
+    images: list[resource],
+):
+    audio_raw = audio["raw"]
+    audio_type = audio["mimetype"]
+    audio_size = len(audio_raw) / 1024
+    websocket_logger.info(
+        (
+            f"Got a query sent as {audio_type} audio of {audio_size}KB"
+            f" and {len(images)} images"
+        )
+    )
+
+    @timed.async_("Image Selection For Query")
+    async def get_image():
+        frames = [image_processor.bytes_to_ndarray(image["raw"]) for image in images]
+        gray_frames = [frame for frame in image_processor._grays_scale_image(frames)]
+        best_frame_index = image_processor._get_sharpest_frame(gray_frames)
+        best_frame = frames[best_frame_index]
+        image_bytes = await asyncio.to_thread(
+            image_processor.convert_result_image_to_bytes, best_frame
+        )
+        return image_bytes
+
+    @timed.async_("Transcription")
+    async def get_transcript():
+        transcript = (
+            await asyncio.to_thread(
+                transcriber.run,
+                {
+                    "audio": Audio(base64=audio_raw),
+                },
+            )
+        )[0]["text"]
+        return transcript
+
+    try:
+        image_bytes, transcript = await asyncio.gather(get_image(), get_transcript())
+        if not transcript:
+            websocket_logger.info("No transcript found")
+            return await sio.emit("no-audio", to=sid)
+        if len(transcript) > 500:
+            websocket_logger.info("Transcript too long")
+            return await sio.emit("long-audio", to=sid)
+        elif len(transcript) < 10:
+            websocket_logger.info("Transcript too short")
+            return await sio.emit("short-audio", to=sid)
+        print(f"image_bytes: {image_bytes[:10]}")
+        answer = (
+            await asyncio.to_thread(
+                gpt4va.run,
+                {
+                    "text": Text(raw=TEMPLATE.format(transcript=transcript)),
+                    "image": Image(base64=image_bytes),
+                },
+            )
+        )[0]["text"]
+        await sio.emit("text", answer, to=sid)
+        websocket_logger.info("Query successfully processed.")
     except Exception as e:
         websocket_logger.error("WebsocketError", exc_info=True)
         raise e
