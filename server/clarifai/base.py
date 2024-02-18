@@ -28,14 +28,11 @@ loadenv()
 
 
 class _SupportsReadSeekTell(Protocol):
-    def read(self, __n: int = ...) -> bytes:
-        ...
+    def read(self, __n: int = ...) -> bytes: ...
 
-    def seek(self, __cookie: int, __whence: int) -> object:
-        ...
+    def seek(self, __cookie: int, __whence: int) -> object: ...
 
-    def tell(self) -> int:
-        ...
+    def tell(self) -> int: ...
 
 
 MediaType = TypeVar("MediaType", Image, Video, Audio, Text)
@@ -258,7 +255,7 @@ class BaseModel(Generic[MediaType, ResponseType]):
         return [self.parse_output(output) for output in outputs]
 
     def handle_error(self, error: Status) -> None:
-        raise Exception(f"{error.description}")
+        raise Exception(f"{error.description} {error.details}")
 
     def run(self, *data: dict[str, MediaType]) -> list[ResponseType]:
         @logger(model_name=self.model_name, model_id=self.model_id)
