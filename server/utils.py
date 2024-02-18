@@ -59,13 +59,11 @@ def loadenv(override: bool = False):
 
 
 @overload
-def getenv(name: str) -> str:
-    ...
+def getenv(name: str) -> str: ...
 
 
 @overload
-def getenv(name: str, default: T) -> Union[str, T]:
-    ...
+def getenv(name: str, default: T) -> Union[str, T]: ...
 
 
 def getenv(name: str, default: Union[str, T] = MISSING) -> Union[str, T]:  # type: ignore[assignment]
@@ -79,13 +77,11 @@ def getenv(name: str, default: Union[str, T] = MISSING) -> Union[str, T]:  # typ
 
 
 @overload
-def getlistenv(name: str) -> list[str]:
-    ...
+def getlistenv(name: str) -> list[str]: ...
 
 
 @overload
-def getlistenv(name: str, default: T) -> Union[list[str], T]:
-    ...
+def getlistenv(name: str, default: T) -> Union[list[str], T]: ...
 
 
 def getlistenv(name: str, default: Union[list[str], T] = MISSING) -> Union[list[str], T]:  # type: ignore[assignment]
@@ -99,13 +95,11 @@ def getlistenv(name: str, default: Union[list[str], T] = MISSING) -> Union[list[
 
 
 @overload
-def getintenv(name: str) -> int:
-    ...
+def getintenv(name: str) -> int: ...
 
 
 @overload
-def getintenv(name: str, default: T) -> Union[int, T]:
-    ...
+def getintenv(name: str, default: T) -> Union[int, T]: ...
 
 
 def getintenv(name: str, default: Union[int, T] = MISSING) -> Union[int, T]:  # type: ignore[assignment]
@@ -119,13 +113,11 @@ def getintenv(name: str, default: Union[int, T] = MISSING) -> Union[int, T]:  # 
 
 
 @overload
-def getfloatenv(name: str) -> float:
-    ...
+def getfloatenv(name: str) -> float: ...
 
 
 @overload
-def getfloatenv(name: str, default: T) -> Union[float, T]:
-    ...
+def getfloatenv(name: str, default: T) -> Union[float, T]: ...
 
 
 def getfloatenv(name: str, default: Union[float, T] = MISSING) -> Union[float, T]:  # type: ignore[assignment]
@@ -139,13 +131,11 @@ def getfloatenv(name: str, default: Union[float, T] = MISSING) -> Union[float, T
 
 
 @overload
-def getboolenv(name: str) -> bool:
-    ...
+def getboolenv(name: str) -> bool: ...
 
 
 @overload
-def getboolenv(name: str, default: T) -> Union[bool, T]:
-    ...
+def getboolenv(name: str, default: T) -> Union[bool, T]: ...
 
 
 def getboolenv(name: str, default: Union[bool, T] = MISSING) -> Union[bool, T]:  # type: ignore[assignment]
@@ -184,18 +174,15 @@ class EnvDescriptor(Generic[T]):
 
 
 @overload
-def env_descriptor(name: str) -> str:
-    ...
+def env_descriptor(name: str) -> str: ...
 
 
 @overload
-def env_descriptor(name: str, default: T) -> Union[str, T]:
-    ...
+def env_descriptor(name: str, default: T) -> Union[str, T]: ...
 
 
 @overload
-def env_descriptor(name: str, default: T, getter: Callable[[str, T], T]) -> T:
-    ...
+def env_descriptor(name: str, default: T, getter: Callable[[str, T], T]) -> T: ...
 
 
 def env_descriptor(
@@ -236,9 +223,9 @@ class timed:
     name: Optional[str] = None
     output: Union[str, Callable[[float], str]] = "{name} took: {seconds:0.4f} seconds"
     initial_text: Union[bool, str] = False
-    interrupt_output: Union[
-        str, Callable[[float], str]
-    ] = "{name} interrupted after {:0.4f} seconds"
+    interrupt_output: Union[str, Callable[[float], str]] = (
+        "{name} interrupted after {seconds:0.4f} seconds"
+    )
     logger: Optional[Callable[[str], Any]] = field(
         default_factory=lambda: getLogger("timer").info
     )
