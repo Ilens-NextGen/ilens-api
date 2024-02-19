@@ -3,7 +3,7 @@ from pyinfra.operations import apt, server, files, systemd
 from pyinfra.api import deploy
 from pyinfra.facts.server import Which
 
-from server_files.hosts import load_servers
+from manager.hosts import load_servers
 
 
 DOMAIN = "ilens-api.futurdevs.tech"
