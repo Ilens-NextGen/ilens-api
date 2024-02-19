@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sys
 from typing import TypedDict
 from ilens.server.utils import getenv, loadenv
 import requests
@@ -64,9 +65,11 @@ def update_ssh_config(servers: dict[str, list[Server]]):
 
 
 if not SERVER_LOCAL_BIN.exists():
-    raise RuntimeError(
-        "inventory does not exist!\n" "Run `ilens fetch-inventory` to download it."
+    print(
+        "inventory does not exist!\n" "Run `ilens fetch-inventory` to download it.",
+        file=sys.stderr,
     )
-servers = load_servers()
-loadbalancer = servers.pop("loadbalancer")
-backend = servers.pop("backend")
+else:
+    servers = load_servers()
+    loadbalancer = servers.pop("loadbalancer")
+    backend = servers.pop("backend")
