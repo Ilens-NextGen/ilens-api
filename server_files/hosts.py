@@ -1,15 +1,77 @@
-"""
-WEB 1: 54.173.150.161
-WEB 2: 52.91.136.99
-WEB 3: 35.153.52.140
-WEB 4: 34.229.184.112
-WEB 5: 34.207.189.69
-"""
+import json
+from pathlib import Path
+from typing import TypedDict
+from server.utils import getenv, loadenv
+import requests
+from os.path import expanduser, exists
 
-web_apps = [
-    ("web1", {"name": "web1", "host": "54.173.150.161", "port": 8000}),
-    ("web2", {"name": "web2", "host": "52.91.136.99", "port": 8000}),
-    ("web3", {"name": "web3", "host": "35.153.52.140", "port": 8000}),
-    ("web4", {"name": "web4", "host": "34.229.184.112", "port": 8000}),
-    ("web5", {"name": "web5", "host": "34.207.189.69", "port": 8000}),
-]
+loadenv()
+
+BIN_URL = getenv("JSONBIN_URL")
+BIN_HEADERS = {
+    "X-Access-Key": getenv("JSONBIN_ACCESS_KEY"),
+    "Content-Type": "application/json",
+}
+SSH_CONFIG_FILE = expanduser(getenv("SSH_CONFIG_FILE"))
+SSH_IDENTITY_FILE = expanduser(getenv("SSH_IDENTITY_FILE"))
+SERVER_LOCAL_BIN = Path(__file__).parent / "servers.json"
+
+assert exists(SSH_IDENTITY_FILE), f"{SSH_IDENTITY_FILE} does not exist"
+
+
+class Server(TypedDict):
+    name: str
+    host: str
+    port: int
+    user: str
+
+
+def fetch_servers() -> dict[str, list[Server]]:
+    response = requests.get(BIN_URL, headers=BIN_HEADERS)
+    response.raise_for_status()
+    servers: dict[str, list[Server]] = response.json()["record"]
+    return servers
+
+
+def load_servers() -> dict[str, tuple[str, dict]]:
+    with open(SERVER_LOCAL_BIN, "r") as file:
+        servers: dict[str, list[Server]] = json.load(file)
+    return {
+        group: list(
+            (
+                server["name"],
+                {
+                    "name": server["name"],
+                    "host": server["host"],
+                    "port": server["port"],
+                },
+            )
+            for server in servers
+        )
+        for group, servers in servers.items()
+    }
+
+
+def update_ssh_config(servers: dict[str, list[Server]]):
+    with open(SSH_CONFIG_FILE, "w") as file:
+        for _, group_servers in servers.items():
+            for server in group_servers:
+                file.write(f"Host {server['name']}\n")
+                file.write(f"  HostName {server['host']}\n")
+                file.write(f"  User {server['user']}\n")
+                file.write(f"  IdentityFile {SSH_IDENTITY_FILE}\n")
+                file.write("\n")
+
+
+if __name__ == "__main__":
+    servers = fetch_servers()
+    update_ssh_config(servers)
+    SERVER_LOCAL_BIN.write_text(json.dumps(servers, indent=2))
+else:
+    if not SERVER_LOCAL_BIN.exists():
+        servers = fetch_servers()
+        update_ssh_config(servers)
+        SERVER_LOCAL_BIN.write_text(json.dumps(servers, indent=2))
+    servers = load_servers()
+    loadbalancer = servers.pop("loadbalancer")
+    backend = servers.pop("backend")
