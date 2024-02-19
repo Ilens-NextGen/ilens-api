@@ -1,17 +1,21 @@
-frontend main
+frontend ilens_frontend
   mode http
   bind :80
-  {% if ssl_pem_file %}
-  bind :443 ssl crt {{ ssl_pem_file }}
-  http-request redirect scheme https unless { ssl_fc }
-  {% endif %}
-  default_backend websocket_servers
+  {% if cert_file %}bind :443 ssl crt {{ cert_file }}
+  http-request redirect scheme https unless { ssl_fc } {% endif %}
+  default_backend ilens_backend
 
-backend websocket_servers
+backend ilens_backend
+  mode http
   option http-server-close
   timeout tunnel 1h
   balance leastconn
   option forwardfor
-  {% for server in servers %}
-  server {{ server.name }} {{ server.host }}:{{ server.port }} check
-  {% endfor %}
+  {% for server in servers %}server {{ server[0] }} {{ server[1].host }}:{{ server[1].port }} check {% endfor %}
+
+frontend stats
+  bind :9000
+  mode http
+  stats enable
+  stats uri /
+  stats auth admin:admin
