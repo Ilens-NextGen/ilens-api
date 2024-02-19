@@ -102,7 +102,7 @@ def setup_loggly():
     )
     files.template(
         name="Create rsyslog config",
-        src="server_files/templates/22-loggly.conf.j2",
+        src="manager/templates/22-loggly.conf.j2",
         dest="/etc/rsyslog.d/22-loggly.conf",
         _sudo=sudo,
         loggly_token=LOGGLY_TOKEN,
@@ -181,7 +181,7 @@ def install_project():
     )
     files.template(
         name="Create systemd service",
-        src="server_files/templates/ilens.service.j2",
+        src="manager/templates/ilens.service.j2",
         dest=SERVICE_FILE,
         project_src=PROJECT_SRC,
         _sudo=sudo,

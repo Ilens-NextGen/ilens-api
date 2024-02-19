@@ -28,7 +28,7 @@ init:             ## Initialize the project.
 
 .PHONY: run
 run:              ## Run the production server.
-	python start.py
+	python ilens/start.py
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
@@ -48,32 +48,32 @@ requirements:     ## Generate requirements.txt.
 
 .PHONY: live_logs
 live_logs:        ## Show live logs.
-	@pyinfra --quiet --limit $(BK) server_files/hosts.py exec -- tail -fn $(NUM_LINES) '~/projects/ilens-api/ilens_server.log'
+	@pyinfra --quiet --limit $(BK) manager/hosts.py exec -- tail -fn $(NUM_LINES) '~/projects/ilens-api/ilens_server.log'
 
 .PHONY: deploy_web
 deploy_web:           ## Deploy the project.
-	@pyinfra --limit $(BK) --quiet server_files/hosts.py server_files/deploy_web.py
+	@pyinfra --limit $(BK) --quiet manager/hosts.py manager/deploy_web.py
 
 .PHONY: health_check
 health_check:           ## Check the health of the project.
-	@pyinfra --quiet --limit $(BK) server_files/hosts.py exec -- curl -s 0:8000
+	@pyinfra --quiet --limit $(BK) manager/hosts.py exec -- curl -s 0:8000
 
 .PHONY: stop_server
 stop_server:           ## Stop the server.
-	@pyinfra --quiet --limit $(BK) server_files/hosts.py exec -- service ilens stop
+	@pyinfra --quiet --limit $(BK) manager/hosts.py exec -- service ilens stop
 
 .PHONY: start_server
 start_server:           ## Start the server.
-	@pyinfra --quiet --limit $(BK) server_files/hosts.py exec -- service ilens start
+	@pyinfra --quiet --limit $(BK) manager/hosts.py exec -- service ilens start
 
 .PHONY: deploy_loadbalancer
 deploy_loadbalancer:           ## Deploy the loadbalancer.
-	@pyinfra --limit $(LB) server_files/hosts.py server_files/deploy_haproxy.py
+	@pyinfra --limit $(LB) manager/hosts.py manager/deploy_haproxy.py
 
 .PHONY: stop_loadbalancer
 stop_loadbalancer:           ## Stop the loadbalancer.
-	@pyinfra --quiet --limit $(LB) server_files/hosts.py exec -- service haproxy stop
+	@pyinfra --quiet --limit $(LB) manager/hosts.py exec -- service haproxy stop
 
 .PHONY: start_loadbalancer
 start_loadbalancer:           ## Start the loadbalancer.
-	@pyinfra --quiet --limit $(LB) server_files/hosts.py exec -- service haproxy start
+	@pyinfra --quiet --limit $(LB) manager/hosts.py exec -- service haproxy start

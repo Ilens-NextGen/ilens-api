@@ -85,7 +85,7 @@ def setup_haproxy():
     )
     files.template(
         name="Create haproxy.cfg",
-        src="server_files/templates/haproxy.cfg.j2",
+        src="manager/templates/haproxy.cfg.j2",
         dest="/etc/haproxy/haproxy.cfg",
         _sudo=sudo,
         domain=DOMAIN,
