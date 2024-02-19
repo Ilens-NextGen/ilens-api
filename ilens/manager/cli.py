@@ -37,7 +37,7 @@ def deploy_app(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "manager/deploy_web.py"])
+    args.extend(["ilens/manager/hosts.py", "ilens/manager/deploy_web.py"])
     return system(" ".join(args))
 
 
@@ -53,7 +53,7 @@ def deploy_haproxy(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "manager/deploy_haproxy.py"])
+    args.extend(["ilens/manager/hosts.py", "ilens/manager/deploy_haproxy.py"])
     return system(" ".join(args))
 
 
@@ -71,7 +71,7 @@ def health_check(host: str, quiet: bool):
         args.append("--quiet")
     if host:
         args.extend(["--limit", host])
-    args.extend(["manager/hosts.py", "manager/health_check.py"])
+    args.extend(["ilens/manager/hosts.py", "ilens/manager/health_check.py"])
     return system(" ".join(args))
 
 
@@ -85,7 +85,7 @@ def start_app(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "exec", "--", "service", "ilens", "start"])
+    args.extend(["ilens/manager/hosts.py", "exec", "--", "service", "ilens", "start"])
     return system(" ".join(args))
 
 
@@ -99,7 +99,7 @@ def stop_app(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "exec", "--", "service", "ilens", "stop"])
+    args.extend(["ilens/manager/hosts.py", "exec", "--", "service", "ilens", "stop"])
     return system(" ".join(args))
 
 
@@ -115,7 +115,7 @@ def start_haproxy(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "exec", "--", "service", "haproxy", "start"])
+    args.extend(["ilens/manager/hosts.py", "exec", "--", "service", "haproxy", "start"])
     return system(" ".join(args))
 
 
@@ -131,7 +131,7 @@ def stop_haproxy(host: str, quiet: bool):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "exec", "--", "service", "haproxy", "stop"])
+    args.extend(["ilens/manager/hosts.py", "exec", "--", "service", "haproxy", "stop"])
     return system(" ".join(args))
 
 
@@ -149,7 +149,7 @@ def app_logs(host: str, quiet: bool, follow: bool, lines: int):
     args = ["pyinfra", "--limit", host]
     if quiet:
         args.append("--quiet")
-    args.extend(["manager/hosts.py", "exec", "--", "tail"])
+    args.extend(["ilens/manager/hosts.py", "exec", "--", "tail"])
     if follow:
         args.append("-f")
     args.extend(["-n", str(lines), "~/projects/ilens-api/ilens_server.log"])

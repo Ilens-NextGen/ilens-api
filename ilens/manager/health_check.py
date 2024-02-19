@@ -11,8 +11,8 @@ def health_check():
         commands=[
             "echo 'Server is up'",
             (
-                f"(curl 0:{port} | grep 200 > /dev/null && echo 'App is running "
-                f"on port {port}...') || (echo 'App is down :(' && false)",
+                f"(curl 0:{port} -sI | grep 200 > /dev/null && echo 'App is running "
+                f"on port {port}...') || (echo 'App is down :(' && false)"
             ),
         ],
     )
