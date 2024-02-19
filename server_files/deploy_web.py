@@ -206,5 +206,4 @@ def deploy_web():
     install_project()
 
 
-# setup_loggly()
 deploy_web()
