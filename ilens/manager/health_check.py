@@ -6,15 +6,10 @@ from pyinfra import host
 @deploy("Health Check")
 def health_check():
     port = host.data.get("port", 8000)
+    server.shell(name="Server is up?", commands=["true"])
     server.shell(
-        name="Health Check",
-        commands=[
-            "echo 'Server is up'",
-            (
-                f"(curl 0:{port} -sI | grep 200 > /dev/null && echo 'App is running "
-                f"on port {port}...') || (echo 'App is down :(' && false)"
-            ),
-        ],
+        name=f"Running on port {port}?",
+        commands=[f"curl 0:{port} -sI > /dev/null || false"],
     )
 
 

@@ -58,9 +58,7 @@ def deploy_haproxy(host: str, quiet: bool):
 
 
 @deploy.command("health-check")
-@click.option(
-    "--host", "-h", help="The host to run the health check on", default="backend"
-)
+@click.option("--host", "-h", help="The host to run the health check on")
 @click.option(
     "--quiet", "-q", help="Do not output anything", is_flag=True, default=False
 )
