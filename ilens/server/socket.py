@@ -1,5 +1,5 @@
 from socketio.async_server import AsyncServer
-from server import settings
+from ilens.server import settings
 import socket
 
 server = AsyncServer(
@@ -23,4 +23,4 @@ server.instrument(
     mode="production" if not settings.DEBUG else "development",
     server_id=socket.gethostname(),
 )
-from server import consumers  # noqa: E402, F401
+from ilens.server import consumers  # noqa: E402, F401

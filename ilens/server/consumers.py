@@ -2,16 +2,23 @@ import asyncio
 from pathlib import Path
 from typing import Literal, TypedDict
 from uuid import uuid4
-from server.clarifai import ClarifaiTranscription
-from server.clarifai.base import Audio, Text
-from server.clarifai.text_generation import ClarifaiGPT4V, ClarifaiGPT4VAlternative
-from server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
-from server.clarifai.image_processor import AsyncVideoProcessor
-from server.clarifai import Image, ClarifaiImageRecognition, ClarifaiImageDetection
-from server.socket import server as sio
-from server.utils import timed
-from server.logger import CustomLogger
-from server.settings import SERVER_ID
+from ilens.server.clarifai import ClarifaiTranscription
+from ilens.server.clarifai.base import Audio, Text
+from ilens.server.clarifai.text_generation import (
+    ClarifaiGPT4V,
+    ClarifaiGPT4VAlternative,
+)
+from ilens.server.clarifai.workflows import ClarifaiMultimodalToSpeechWF
+from ilens.server.clarifai.image_processor import AsyncVideoProcessor
+from ilens.server.clarifai import (
+    Image,
+    ClarifaiImageRecognition,
+    ClarifaiImageDetection,
+)
+from ilens.server.socket import server as sio
+from ilens.server.utils import timed
+from ilens.server.logger import CustomLogger
+from ilens.server.settings import SERVER_ID
 import aiofiles  # type: ignore
 import aiofiles.os  # type: ignore
 

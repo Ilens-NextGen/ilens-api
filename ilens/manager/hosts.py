@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from typing import TypedDict
-from server.utils import getenv, loadenv
+from ilens.server.utils import getenv, loadenv
 import requests
 from os.path import expanduser, exists
 

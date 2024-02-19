@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from typing import Any, Optional
-from server.utils import getboolenv, getenv, getintenv, getlistenv, loadenv
+from ilens.server.utils import getboolenv, getenv, getintenv, getlistenv, loadenv
 import sys
 from sanic.__main__ import main as sanic  # noqa: F401
 

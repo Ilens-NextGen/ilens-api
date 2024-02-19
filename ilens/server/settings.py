@@ -1,4 +1,4 @@
-from server.utils import getboolenv, getenv, getintenv, getlistenv, loadenv
+from ilens.server.utils import getboolenv, getenv, getintenv, loadenv
 from socket import gethostname
 
 # load the environment variables from the env file if it exists

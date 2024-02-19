@@ -2,10 +2,10 @@ from dataclasses import dataclass, field
 
 from clarifai_grpc.grpc.api.resources_pb2 import Input
 from clarifai_grpc.grpc.api.service_pb2 import PostWorkflowResultsRequest
-from server.clarifai.base import BaseWorkflow, Image, Text
+from ilens.server.clarifai.base import BaseWorkflow, Image, Text
 from typing import Any, TypedDict
 from io import BytesIO
-from server.utils import getenv
+from ilens.server.utils import getenv
 
 
 class AudioResponse(TypedDict):

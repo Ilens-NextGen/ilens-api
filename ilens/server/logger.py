@@ -3,8 +3,8 @@ import functools
 from rich.logging import RichHandler
 import logging.handlers
 
-from server.utils import getlistenv, getenv, getboolenv
-from server.settings import SERVER_ID as server
+from ilens.server.utils import getlistenv, getenv, getboolenv
+from ilens.server.settings import SERVER_ID as server
 
 debug = getboolenv("DEBUG", False)
 log_fmt = getenv(
@@ -20,7 +20,7 @@ log_keywords = getlistenv("LOG_KEYWORDS", []) + [
 ]
 
 date_fmt = getenv("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S %z")
-log_file = getenv("LOG_FILE", "ilens_server.log")
+log_file = getenv("LOG_FILE", "ilens.log")
 log_level = getenv("LOG_LEVEL", "DEBUG")
 log_to_file = getboolenv("LOG_TO_FILE", True)
 
@@ -60,9 +60,7 @@ logging.basicConfig(
 
 
 class CustomLogger:
-    def __init__(
-        self, logger_name, file_logging=log_to_file, file_name="ilens_server.log"
-    ):
+    def __init__(self, logger_name, file_logging=log_to_file, file_name=log_file):
         self.logger = logging.getLogger(logger_name)
         self.logger.setLevel(log_level)  # Set the logging level
         # Prevent the log messages from being duplicated in the python.log file

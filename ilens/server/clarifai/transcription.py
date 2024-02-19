@@ -1,6 +1,6 @@
 from typing import Any, TypedDict, Optional
-from server.clarifai.base import BaseModel, Audio
-from server.utils import getenv
+from ilens.server.clarifai.base import BaseModel, Audio
+from ilens.server.utils import getenv
 from dataclasses import field, dataclass
 
 
@@ -13,6 +13,7 @@ class TextResponse(TypedDict):
 @dataclass
 class ClarifaiTranscription(BaseModel[Audio, TextResponse]):
     """Clarifai Speech Transcription Model"""
+
     model_name = "transcription"
     model_id: str = field(
         default_factory=lambda: getenv("CLARIFAI_TRANSCRIPTION_MODEL_ID")

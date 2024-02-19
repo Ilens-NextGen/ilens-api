@@ -1,7 +1,7 @@
 from pathlib import Path
 from sanic import Sanic
 from sanic.response import text
-from server.settings import SERVER_ID
+from ilens.server.settings import SERVER_ID
 from sanic.response import file_stream
 from sanic.exceptions import NotFound
 from aiofiles import os
@@ -33,7 +33,7 @@ async def get_resource(request, filename: str):
 
 
 def create_app():
-    from server.socket import server
+    from ilens.server.socket import server
 
     server.attach(app)
     return app

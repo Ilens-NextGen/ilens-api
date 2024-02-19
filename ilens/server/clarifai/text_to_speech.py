@@ -1,6 +1,6 @@
 from typing import Any, Optional, TypedDict
-from server.clarifai.base import BaseModel, Text
-from server.utils import getenv, getfloatenv
+from ilens.server.clarifai.base import BaseModel, Text
+from ilens.server.utils import getenv, getfloatenv
 from dataclasses import field, dataclass
 from io import BytesIO
 

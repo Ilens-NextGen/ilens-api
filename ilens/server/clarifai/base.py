@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import io
 from pathlib import Path
 from typing import Any, Generic, Optional, Protocol, Type, TypeAlias, TypeVar, Union
-from server.utils import getenv, loadenv
+from ilens.server.utils import getenv, loadenv
 import clarifai_grpc.grpc.api.resources_pb2 as resources_pb2
 import clarifai_grpc.grpc.api.service_pb2 as service_pb2
 import clarifai_grpc.grpc.api.service_pb2_grpc as service_pb2_grpc
@@ -13,7 +13,7 @@ from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from google.protobuf.struct_pb2 import Struct
 from clarifai_grpc.grpc.api.status import status_code_pb2
 from clarifai_grpc.grpc.api.status.status_pb2 import Status
-from server.logger import CustomLogger
+from ilens.server.logger import CustomLogger
 from functools import wraps
 
 Image: TypeAlias = resources_pb2.Image

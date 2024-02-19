@@ -8,7 +8,7 @@ import imageio.v3 as iio
 import numpy as np
 from PIL import Image
 
-from server.logger import CustomLogger
+from ilens.server.logger import CustomLogger
 
 video_processor_logger = CustomLogger("VideoProcessor").get_logger()
 

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Optional, TypedDict
 from itertools import groupby
-from server.clarifai.base import BaseModel, Concept, Image
-from server.utils import getenv, getfloatenv, getintenv, getlistenv
+from ilens.server.clarifai.base import BaseModel, Concept, Image
+from ilens.server.utils import getenv, getfloatenv, getintenv, getlistenv
 
 DEFAULT_OBSTACLES = [
     "Ambulance",
