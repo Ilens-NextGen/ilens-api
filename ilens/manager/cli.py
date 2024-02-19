@@ -27,6 +27,17 @@ def logs():
     """Get App / Load Balancer Logs"""
 
 
+@cli.command("fetch-inventory")
+def fetch_inventory():
+    from ilens.manager.hosts import fetch_servers, update_ssh_config, SERVER_LOCAL_BIN
+    import json
+
+    click.echo("Fetching inventory")
+    servers = fetch_servers()
+    update_ssh_config(servers)
+    SERVER_LOCAL_BIN.write_text(json.dumps(servers, indent=2))
+
+
 @deploy.command("app")
 @click.option("--host", "-h", help="The host to deploy the app to", default="backend")
 @click.option(

@@ -63,15 +63,10 @@ def update_ssh_config(servers: dict[str, list[Server]]):
                 file.write("\n")
 
 
-if __name__ == "__main__":
-    servers = fetch_servers()
-    update_ssh_config(servers)
-    SERVER_LOCAL_BIN.write_text(json.dumps(servers, indent=2))
-else:
-    if not SERVER_LOCAL_BIN.exists():
-        servers = fetch_servers()
-        update_ssh_config(servers)
-        SERVER_LOCAL_BIN.write_text(json.dumps(servers, indent=2))
-    servers = load_servers()
-    loadbalancer = servers.pop("loadbalancer")
-    backend = servers.pop("backend")
+if not SERVER_LOCAL_BIN.exists():
+    raise RuntimeError(
+        "inventory does not exist!\n" "Run `ilens fetch-inventory` to download it."
+    )
+servers = load_servers()
+loadbalancer = servers.pop("loadbalancer")
+backend = servers.pop("backend")
