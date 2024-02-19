@@ -1,6 +1,7 @@
 from pyinfra import host
 from pyinfra.operations import apt, server, files, systemd
 from pyinfra.api import deploy
+from pyinfra.facts import files as files_facts
 from pyinfra.facts.server import Which
 
 from ilens.manager.hosts import load_servers
@@ -76,8 +77,9 @@ def setup_ssl_certificates():
 def setup_haproxy():
     servers = load_servers()["backend"]
     sudo = bool(host.get_fact(Which, "sudo"))
-    setup_server()
-    setup_ssl_certificates()
+    if not host.get_fact(files_facts.File, path="/etc/haproxy/haproxy.cfg"):
+        setup_server()
+        setup_ssl_certificates()
     apt.packages(
         name="Install HAProxy",
         packages=["haproxy"],
